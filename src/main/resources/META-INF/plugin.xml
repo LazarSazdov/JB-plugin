@@ -1,15 +1,49 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.lazarsazdov.jbplugin</id>
-    <name>JB-plugin</name>
-    <vendor>lazarsazdov</vendor>
-
+    <name>Auto Code Walker</name>
+    <vendor>lucky 3</vendor>
+    <depends>com.intellij.modules.java-capable</depends>
     <depends>com.intellij.modules.platform</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.lazarsazdov.jbplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.lazarsazdov.jbplugin.startup.MyProjectActivity" />
+        <!-- Services -->
+        <applicationService serviceImplementation="com.hackathon.openai.OpenAIService"/>
+        <projectService serviceImplementation="com.hackathon.service.TourStateService"/>
+
+        <!-- Tool Window -->
+        <toolWindow id="Auto Code Walker"
+                    factoryClass="com.hackathon.ui.TourToolWindowFactory"
+                    anchor="right"/>
+
+        <!-- Documentation Integration (New API) -->
+        <platform.backend.documentation.psiTargetProvider implementation="com.hackathon.doc.TourDocTargetProvider"/>
     </extensions>
+
+    <actions>
+        <!-- Editor popup action to add a step -->
+        <action id="com.hackathon.actions.AddStepAction"
+                class="com.hackathon.actions.AddStepAction"
+                text="Add Tour Step"
+                description="Add selected code as a tour step">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <!-- Tools menu actions -->
+        <action id="com.hackathon.actions.GenerateTourAction"
+                class="com.hackathon.actions.GenerateTourAction"
+                text="Generate Tour JSON"
+                description="Generate JSON tour from collected steps">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <action id="com.hackathon.actions.LoadTourAction"
+                class="com.hackathon.actions.LoadTourAction"
+                text="Load Tour JSON"
+                description="Load a JSON tour and start viewing">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

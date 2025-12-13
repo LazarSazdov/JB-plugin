@@ -19,6 +19,12 @@ kotlin {
     jvmToolchain(21)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 // Configure project's dependencies
 repositories {
     mavenCentral()
@@ -40,6 +46,8 @@ dependencies {
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+        // CRITICAL: Ensure Java support for PSI
+        bundledPlugin("com.intellij.java")
 
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
@@ -49,6 +57,9 @@ dependencies {
 
         testFramework(TestFrameworkType.Platform)
     }
+
+    // JSON library
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html
