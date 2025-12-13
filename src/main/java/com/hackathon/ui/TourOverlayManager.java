@@ -38,6 +38,7 @@ public final class TourOverlayManager {
     public static void hide(Editor editor) {
         Overlay ov = overlays.remove(editor);
         if (ov != null) ov.detach();
+        EditorNavigationService.clearHighlight();
     }
 
     static final class Overlay extends JComponent {

@@ -80,15 +80,21 @@ public final class EditorNavigationService {
 
 
         MarkupModel markup = editor.getMarkupModel();
-        RangeHighlighter rh = markup.addRangeHighlighter(
+        lastHighlighter = markup.addRangeHighlighter(
                 startOffset,
                 endOffset,
                 HighlighterLayer.SELECTION - 1,
                 attrs,
                 HighlighterTargetArea.EXACT_RANGE
         );
-
-        lastHighlighter = rh;
         lastEditor = editor;
+    }
+
+    public static void clearHighlight() {
+        if (lastHighlighter != null && lastEditor != null && !lastEditor.isDisposed()) {
+            lastEditor.getMarkupModel().removeHighlighter(lastHighlighter);
+        }
+        lastHighlighter = null;
+        lastEditor = null;
     }
 }

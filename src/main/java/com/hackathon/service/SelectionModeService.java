@@ -356,6 +356,7 @@ public final class SelectionModeService implements Disposable {
     private final class FinishHud extends JComponent {
         private final Editor editor;
         private final JButton finishBtn = new JButton("Finish Tour");
+        private final JButton clearBtn = new JButton("Clear Selection");
         private final java.awt.event.ComponentListener compListener = new java.awt.event.ComponentAdapter() {
             @Override public void componentResized(java.awt.event.ComponentEvent e) { relayout(); }
             @Override public void componentMoved(java.awt.event.ComponentEvent e) { relayout(); }
@@ -366,6 +367,7 @@ public final class SelectionModeService implements Disposable {
             setLayout(null);
             setOpaque(false);
 
+            // Finish Button
             finishBtn.setText("Finish Tour");
             finishBtn.setBackground(new JBColor(new Color(0, 120, 215), new Color(0, 90, 180)));
             finishBtn.setForeground(Color.WHITE);
@@ -373,9 +375,19 @@ public final class SelectionModeService implements Disposable {
             finishBtn.setBorderPainted(false);
             finishBtn.setFont(finishBtn.getFont().deriveFont(Font.BOLD));
             finishBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
             finishBtn.addActionListener(e -> performFinalize());
             add(finishBtn);
+
+            // Clear Button
+            clearBtn.setText("Clear Selection");
+            clearBtn.setBackground(new JBColor(new Color(220, 220, 220), new Color(80, 80, 80)));
+            clearBtn.setForeground(new JBColor(Color.BLACK, Color.WHITE));
+            clearBtn.setOpaque(true);
+            clearBtn.setBorderPainted(false);
+            clearBtn.setFont(finishBtn.getFont());
+            clearBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            clearBtn.addActionListener(e -> performClear());
+            add(clearBtn);
         }
 
         void attach() {
@@ -404,7 +416,14 @@ public final class SelectionModeService implements Disposable {
             setBounds(pt.x, pt.y, comp.getWidth(), comp.getHeight());
 
             int btnW = 140, btnH = 30;
-            finishBtn.setBounds(getWidth() - btnW - 20, getHeight() - btnH - 20, btnW, btnH);
+            int gap = 10;
+
+            int finishX = getWidth() - btnW - 20;
+            int y = getHeight() - btnH - 20;
+
+            finishBtn.setBounds(finishX, y, btnW, btnH);
+            clearBtn.setBounds(finishX - btnW - gap, y, btnW, btnH);
+
             revalidate();
             repaint();
         }
@@ -421,6 +440,12 @@ public final class SelectionModeService implements Disposable {
                 //noinspection deprecation
                 ActionUtil.performActionDumbAwareWithCallbacks(action, ev);
             }
+        }
+
+        private void performClear() {
+            TourStateService state = project.getService(TourStateService.class);
+            state.clear();
+            refreshAllEditors();
         }
     }
 }

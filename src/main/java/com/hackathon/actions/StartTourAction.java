@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.hackathon.model.Tour;
 import com.hackathon.model.TourStep;
 import com.hackathon.service.EditorNavigationService;
+import com.hackathon.service.SelectionModeService;
 import com.hackathon.service.TourStateService;
 import com.hackathon.ui.TourToolWindow;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -45,6 +46,13 @@ public class StartTourAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         if (project == null) return;
+
+        // Disable selection mode if active
+        SelectionModeService selectionService = project.getService(SelectionModeService.class);
+        if (selectionService != null) {
+            selectionService.setEnabled(false);
+        }
+
         String base = project.getBasePath();
         if (base == null) {
             Messages.showErrorDialog(project, "No project base path.", "Start Tour");
