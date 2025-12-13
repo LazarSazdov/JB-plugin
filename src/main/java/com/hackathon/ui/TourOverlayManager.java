@@ -85,9 +85,9 @@ public final class TourOverlayManager {
 
             // Styling
             JBColor blue = new JBColor(new Color(0, 120, 215), new Color(0, 120, 215));
-            nextButton.setBackground(blue);
+            nextButton.setBackground(JBColor.BLUE);
             nextButton.setForeground(JBColor.WHITE);
-            finishButton.setBackground(blue);
+            finishButton.setBackground(JBColor.BLUE);
             finishButton.setForeground(JBColor.WHITE);
 
             prevButton.setBackground(JBColor.GRAY);

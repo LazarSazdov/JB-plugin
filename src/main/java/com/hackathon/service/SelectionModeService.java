@@ -132,6 +132,10 @@ public final class SelectionModeService implements Disposable {
 
             TourStateService state = project.getService(TourStateService.class);
 
+            String type = "manual";
+            if (target instanceof PsiClass) type = "class";
+            else if (target instanceof PsiMethod) type = "method";
+
             // Toggle selection: if already present for same file+start line, remove it; else add it
             Optional<TourStep> existing = state.getSteps().stream()
                     .filter(s -> Objects.equals(s.filePath(), vFile.getPath()) && s.lineNum() == (startLine0 + 1) &&
@@ -140,7 +144,7 @@ public final class SelectionModeService implements Disposable {
             if (existing.isPresent()) {
                 removeStep(state, existing.get());
             } else {
-                TourStep step = new TourStep(vFile.getPath(), startLine0 + 1, code, note, null, endLine0 + 1, symbolName);
+                TourStep step = new TourStep(vFile.getPath(), startLine0 + 1, code, note, null, endLine0 + 1, symbolName, type);
                 state.addStep(step);
             }
 

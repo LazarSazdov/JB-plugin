@@ -67,7 +67,7 @@ public class FinalizeTourAction extends AnAction {
             if (result != null && (title == null || title.isBlank() || "Untitled Tour".equals(title))) {
                 title = result.title();
             }
-            updated.add(new TourStep(s.filePath(), s.lineNum(), s.codeSnippet(), s.authorNote(), html, s.endLine(), s.symbolName()));
+            updated.add(new TourStep(s.filePath(), s.lineNum(), s.codeSnippet(), s.authorNote(), html, s.endLine(), s.symbolName(), s.type()));
         }
 
         String suggested = title == null || title.isBlank() ? "Auto Code Walker Tour" : title;

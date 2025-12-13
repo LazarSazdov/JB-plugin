@@ -71,6 +71,8 @@ public class TourToolWindow {
             htmlPane.setText("<html><body><p>No steps yet. Use editor popup: Add Tour Step.</p></body></html>");
             finishBtn.setVisible(false);
             nextBtn.setVisible(true);
+            //set nextbtn to blue
+
         }
     }
 

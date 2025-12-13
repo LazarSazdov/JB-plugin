@@ -14,5 +14,6 @@ public record TourStep(
         String authorNote,
         String aiExplanation,
         Integer endLine,
-        String symbolName
+        String symbolName,
+        String type // "class", "method", "manual"
 ) {}

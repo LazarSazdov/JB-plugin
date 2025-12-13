@@ -77,7 +77,7 @@ public class AddStepAction extends AnAction {
         var result = ai.generateExplanation(code, note);
         String explanation = result != null ? result.htmlContent() : null;
 
-        TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation, endLineNum, null);
+        TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation, endLineNum, null, "manual");
 
         TourStateService state = project.getService(TourStateService.class);
         state.addStep(step);
