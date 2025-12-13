@@ -54,6 +54,7 @@ public class AddStepAction extends AnAction {
         }
 
         int lineNum = document.getLineNumber(start) + 1;
+        int endLineNum = document.getLineNumber(end) + 1;
 
         StepCreationDialog dialog = new StepCreationDialog(project);
         if (!dialog.showAndGet()) {
@@ -65,7 +66,7 @@ public class AddStepAction extends AnAction {
         var result = ai.generateExplanation(code, note);
         String explanation = result != null ? result.htmlContent() : null;
 
-        TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation);
+        TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation, endLineNum, null);
 
         TourStateService state = project.getService(TourStateService.class);
         state.addStep(step);

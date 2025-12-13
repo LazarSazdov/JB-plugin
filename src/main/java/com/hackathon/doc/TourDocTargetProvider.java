@@ -18,17 +18,21 @@ public class TourDocTargetProvider implements PsiDocumentationTargetProvider {
     public @NotNull List<? extends DocumentationTarget> documentationTargets(@NotNull PsiFile file, @NotNull Editor editor, int offset) {
         Project project = file.getProject();
         TourStateService state = project.getService(TourStateService.class);
-        TourStep step = state.getCurrentStep();
-        if (step == null) return Collections.emptyList();
+        List<TourStep> steps = state.getSteps();
+        if (steps.isEmpty()) return Collections.emptyList();
 
         Document doc = editor.getDocument();
         int line = doc.getLineNumber(offset) + 1;
         String currentPath = file.getVirtualFile() != null ? file.getVirtualFile().getPath() : null;
         if (currentPath == null) return Collections.emptyList();
 
-        if (line == step.lineNum() && currentPath.equals(step.filePath())) {
-            PsiElement element = file.findElementAt(offset);
-            return List.of(new TourDocTarget(element, step));
+        for (TourStep step : steps) {
+            int start = step.lineNum();
+            int end = step.endLine() != null ? step.endLine() : start;
+            if (line >= start && line <= end && currentPath.equals(step.filePath())) {
+                PsiElement element = file.findElementAt(offset);
+                return List.of(new TourDocTarget(element, step));
+            }
         }
         return Collections.emptyList();
     }

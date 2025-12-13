@@ -31,14 +31,18 @@ public final class EditorNavigationService {
         if (editor == null) return;
 
         Document document = editor.getDocument();
-        int line = Math.max(Math.min(step.lineNum() - 1, document.getLineCount() - 1), 0);
-        LogicalPosition pos = new LogicalPosition(line, 0);
+        int startLine = Math.max(Math.min(step.lineNum() - 1, document.getLineCount() - 1), 0);
+        int endLine = startLine;
+        if (step.endLine() != null) {
+            endLine = Math.max(Math.min(step.endLine() - 1, document.getLineCount() - 1), startLine);
+        }
+        LogicalPosition pos = new LogicalPosition(startLine, 0);
         editor.getCaretModel().moveToLogicalPosition(pos);
         editor.getScrollingModel().scrollTo(pos, ScrollType.CENTER);
 
         // Highlight the line
-        int startOffset = document.getLineStartOffset(line);
-        int endOffset = document.getLineEndOffset(line);
+        int startOffset = document.getLineStartOffset(startLine);
+        int endOffset = document.getLineEndOffset(endLine);
 
         TextAttributes attrs = new TextAttributes();
         attrs.setBackgroundColor(new Color(255, 255, 150)); // light yellow

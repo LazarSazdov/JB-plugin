@@ -25,10 +25,11 @@ public final class OpenAIService {
 
     /**
      * Generate HTML explanation for a code snippet with an author note.
+     * Requirements: explanation must be precise and include at least one concrete usage example.
      * Uses response_format json_object to get back {"title": ..., "html_content": ...}.
      */
     public @Nullable ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
-        String apiKey = System.getenv("OPENAI_API_KEY");
+        String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
             // Fallback local explanation
             String title = "Auto Code Walker Tour";
@@ -41,7 +42,11 @@ public final class OpenAIService {
         try {
             JsonObject system = new JsonObject();
             system.addProperty("role", "system");
-            system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys 'title' (string for the tour/group title) and 'html_content' (HTML fragment suitable for a JEditorPane). Keep it concise and focused on the selected code. Do NOT include markdown fences.");
+            system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
+                    "'title' (short summary), " +
+                    "'explanation' (clear explanation of the code), " +
+                    "'usage_example' (a short code snippet showing how to call/use this code). " +
+                    "Do not include markdown formatting in the JSON values.");
 
             JsonObject user = new JsonObject();
             user.addProperty("role", "user");
@@ -76,7 +81,13 @@ public final class OpenAIService {
                         String content = msg.get("content").getAsString();
                         JsonObject parsed = gson.fromJson(content, JsonObject.class);
                         String title = parsed.has("title") ? parsed.get("title").getAsString() : "Auto Code Walker Tour";
-                        String html = parsed.has("html_content") ? parsed.get("html_content").getAsString() : "<p>No content</p>";
+
+                        String expl = parsed.has("explanation") ? parsed.get("explanation").getAsString() : "";
+                        String usage = parsed.has("usage_example") ? parsed.get("usage_example").getAsString() : "";
+
+                        String html = "<h3>Explanation</h3><p>" + escape(expl) + "</p>" +
+                                      "<h3>Usage Example</h3><pre>" + escape(usage) + "</pre>";
+
                         return new ExplanationResult(title, html);
                     }
                 }
@@ -96,5 +107,57 @@ public final class OpenAIService {
         return s.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
+    }
+
+    private static volatile String CACHED_API_KEY;
+
+    private static String getApiKey() {
+        // Cached once per app lifecycle
+        String cached = CACHED_API_KEY;
+        if (cached != null) return cached;
+
+        // 1) Environment variable
+        String key = System.getenv("OPENAI_API_KEY");
+        if (key != null && !key.isBlank()) {
+            CACHED_API_KEY = key.trim();
+            return CACHED_API_KEY;
+        }
+        // 2) System property
+        key = System.getProperty("OPENAI_API_KEY");
+        if (key != null && !key.isBlank()) {
+            CACHED_API_KEY = key.trim();
+            return CACHED_API_KEY;
+        }
+        // 3) .env in the first open project base path
+        try {
+            com.intellij.openapi.project.Project[] projects = com.intellij.openapi.project.ProjectManager.getInstance().getOpenProjects();
+            if (projects.length > 0) {
+                String base = projects[0].getBasePath();
+                if (base != null) {
+                    java.io.File env = new java.io.File(base, ".env");
+                    if (env.exists()) {
+                        java.nio.file.Path p = env.toPath();
+                        for (String line : java.nio.file.Files.readAllLines(p)) {
+                            String ln = line.trim();
+                            if (ln.startsWith("#") || ln.isEmpty()) continue;
+                            int eq = ln.indexOf('=');
+                            if (eq > 0) {
+                                String k = ln.substring(0, eq).trim();
+                                String v = ln.substring(eq + 1).trim();
+                                if ((k.equals("OPENAI_API_KEY") || k.equals("openai_api_key")) && !v.isEmpty()) {
+                                    // Remove optional surrounding quotes
+                                    if ((v.startsWith("\"") && v.endsWith("\"")) || (v.startsWith("'") && v.endsWith("'"))) {
+                                        v = v.substring(1, v.length() - 1);
+                                    }
+                                    CACHED_API_KEY = v;
+                                    return CACHED_API_KEY;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
+        return null;
     }
 }

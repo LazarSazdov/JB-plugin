@@ -5,13 +5,12 @@
     <vendor>lucky 3</vendor>
     <depends>com.intellij.modules.java-capable</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Services -->
-        <applicationService serviceImplementation="com.hackathon.openai.OpenAIService"/>
-        <projectService serviceImplementation="com.hackathon.service.TourStateService"/>
+        <!-- Services are registered via @Service annotations in code (Gradle IntelliJ Platform 2.x) -->
 
         <!-- Tool Window -->
         <toolWindow id="Auto Code Walker"
@@ -43,6 +42,46 @@
                 class="com.hackathon.actions.LoadTourAction"
                 text="Load Tour JSON"
                 description="Load a JSON tour and start viewing">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <!-- New flow: Create Tour selection mode and finalize to JSON -->
+        <action id="com.hackathon.actions.CreateTourModeAction"
+                class="com.hackathon.actions.CreateTourModeAction"
+                text="Create Tour (Select Functions)"
+                description="Enter selection mode to pick functions/classes for the tour">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <action id="com.hackathon.actions.FinalizeTourAction"
+                class="com.hackathon.actions.FinalizeTourAction"
+                text="Create Tour (Generate JSON)"
+                description="Generate a tour.json from selected functions using AI explanations">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
+        <!-- Clear all current selections while in selection mode -->
+        <action id="com.hackathon.actions.ClearTourSelectionsAction"
+                class="com.hackathon.actions.ClearTourSelectionsAction"
+                text="Clear Tour Selections"
+                description="Remove all current tour selections">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <!-- Start Tour overlay if tour.json exists in project root -->
+        <action id="com.hackathon.actions.StartTourAction"
+                class="com.hackathon.actions.StartTourAction"
+                text="Start Tour"
+                description="Start an immersive tour overlay if tour.json exists">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <!-- Generate Javadoc for toured elements -->
+        <action id="com.hackathon.actions.GenerateJavadocForTourAction"
+                class="com.hackathon.actions.GenerateJavadocForTourAction"
+                text="Generate Javadoc for Tour"
+                description="Insert/Update Javadoc for all classes/methods included in current tour">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>

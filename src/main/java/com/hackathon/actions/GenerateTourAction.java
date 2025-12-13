@@ -33,13 +33,9 @@ public class GenerateTourAction extends AnAction {
         if (title == null) return;
         state.setTitle(title);
 
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Save Tour JSON");
-        if (chooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) return;
-        File file = chooser.getSelectedFile();
-        if (!file.getName().toLowerCase().endsWith(".json")) {
-            file = new File(file.getParentFile(), file.getName() + ".json");
-        }
+        File dir = new File(project.getBasePath(), ".codewalker");
+        if (!dir.exists()) dir.mkdirs();
+        File file = new File(dir, "tour.json");
 
         Tour tour = new Tour(title, new ArrayList<TourStep>(state.getSteps()));
         try (FileWriter fw = new FileWriter(file, StandardCharsets.UTF_8)) {
