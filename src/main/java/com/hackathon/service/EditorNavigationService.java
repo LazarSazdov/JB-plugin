@@ -13,11 +13,15 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 
 public final class EditorNavigationService {
+    private static RangeHighlighter lastHighlighter;
+    private static Editor lastEditor;
+
     private EditorNavigationService() {}
 
     public static void navigateToStep(Project project, TourStep step) {
@@ -45,18 +49,20 @@ public final class EditorNavigationService {
         int endOffset = document.getLineEndOffset(endLine);
 
         TextAttributes attrs = new TextAttributes();
-        attrs.setBackgroundColor(new Color(255, 255, 150)); // light yellow
-        attrs.setEffectColor(new Color(255, 255, 0));
+        attrs.setBackgroundColor(new Color(255, 255, 150, 168)); // light yellow
+        attrs.setEffectColor(new Color(255, 255, 0, 176));
         attrs.setEffectType(EffectType.BOXED);
 
         MarkupModel markup = editor.getMarkupModel();
-        // Remove previous highlighters we created (optional improvement: track ours). For simplicity, skip removal.
-        markup.addRangeHighlighter(
+        RangeHighlighter rh = markup.addRangeHighlighter(
                 startOffset,
                 endOffset,
                 HighlighterLayer.SELECTION - 1,
                 attrs,
                 HighlighterTargetArea.EXACT_RANGE
         );
+
+        lastHighlighter = rh;
+        lastEditor = editor;
     }
 }

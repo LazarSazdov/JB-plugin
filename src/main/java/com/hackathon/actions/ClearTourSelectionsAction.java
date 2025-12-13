@@ -38,10 +38,7 @@ public class ClearTourSelectionsAction extends AnAction {
         state.clear();
         SelectionModeService sel = project.getService(SelectionModeService.class);
         if (sel != null) {
-            // Refresh highlights in all editors
-            for (Editor editor : com.intellij.openapi.editor.EditorFactory.getInstance().getAllEditors()) {
-                sel.refreshEditorHighlighters(editor);
-            }
+            sel.setEnabled(false);
         }
     }
 }

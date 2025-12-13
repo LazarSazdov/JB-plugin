@@ -6,6 +6,7 @@ import com.hackathon.service.TourStateService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.ui.JBColor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,8 +44,9 @@ public final class TourOverlayManager {
         private final Project project;
         private final Editor editor;
         private final JPanel infoPanel = new JPanel(new BorderLayout(8, 8));
+        private final JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         private final JButton nextButton = new JButton("Next");
-        private final JButton prevButton = new JButton("Prev");
+        private final JButton prevButton = new JButton("Previous");
         private final JButton finishButton = new JButton("Finish Tour");
         private final JLabel stepLabel = new JLabel();
         private final JEditorPane html = new JEditorPane("text/html", "");
@@ -58,29 +60,41 @@ public final class TourOverlayManager {
             setOpaque(false);
             setFocusable(true);
             html.setEditable(false);
+
+            // Info Panel (Explanation)
             infoPanel.setOpaque(true);
-            infoPanel.setBackground(new Color(255, 255, 255, 240));
-            infoPanel.setBorder(BorderFactory.createLineBorder(new Color(0,120,215)));
+            infoPanel.setBackground(new JBColor(new Color(255, 255, 255, 240), new Color(60, 63, 65, 240)));
+            infoPanel.setBorder(BorderFactory.createLineBorder(new JBColor(new Color(0,120,215), new Color(0,120,215))));
             JPanel top = new JPanel(new BorderLayout());
             top.setOpaque(false);
             top.add(stepLabel, BorderLayout.WEST);
             JButton close = new JButton("Close");
             close.addActionListener(e -> TourOverlayManager.hide(editor));
-            JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-            buttons.setOpaque(false);
-            buttons.add(close);
-            buttons.add(prevButton);
-            buttons.add(nextButton);
-            buttons.add(finishButton);
-            nextButton.setBackground(new Color(0,120,215));
-            nextButton.setForeground(Color.WHITE);
-            prevButton.setBackground(new Color(220,220,220));
-            prevButton.setForeground(Color.BLACK);
-            finishButton.setBackground(new Color(0,120,215));
-            finishButton.setForeground(Color.WHITE);
-            top.add(buttons, BorderLayout.EAST);
+            JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+            topButtons.setOpaque(false);
+            topButtons.add(close);
+            top.add(topButtons, BorderLayout.EAST);
             infoPanel.add(top, BorderLayout.NORTH);
             infoPanel.add(new JScrollPane(html), BorderLayout.CENTER);
+
+            // Button Panel (Bottom Right Navigation)
+            buttonPanel.setOpaque(false);
+            buttonPanel.add(prevButton);
+            buttonPanel.add(nextButton);
+            buttonPanel.add(finishButton);
+
+            // Styling
+            JBColor blue = new JBColor(new Color(0, 120, 215), new Color(0, 120, 215));
+            nextButton.setBackground(blue);
+            nextButton.setForeground(JBColor.WHITE);
+            finishButton.setBackground(blue);
+            finishButton.setForeground(JBColor.WHITE);
+
+            prevButton.setBackground(JBColor.GRAY);
+            prevButton.setForeground(JBColor.WHITE);
+
+            add(infoPanel);
+            add(buttonPanel);
 
             nextButton.addActionListener(e -> doNext());
             prevButton.addActionListener(e -> doPrev());
@@ -160,7 +174,11 @@ public final class TourOverlayManager {
             int y = Math.max(20, Math.min(r.height - panelH - 20, focusY));
             // Prefer to the right side as a floating textbox near the focus lines
             infoPanel.setBounds(r.width - panelW - 20, y, panelW, panelH);
-            if (infoPanel.getParent() != this) add(infoPanel);
+
+            // Position button panel at bottom right
+            int btnW = 300;
+            int btnH = 40;
+            buttonPanel.setBounds(r.width - btnW - 20, r.height - btnH - 20, btnW, btnH);
         }
 
         @Override
@@ -169,7 +187,7 @@ public final class TourOverlayManager {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             // Dim background
-            g2.setColor(new Color(0, 0, 0, 100));
+            g2.setColor(new JBColor(new Color(0, 0, 0, 100), new Color(0, 0, 0, 100)));
             g2.fillRect(0, 0, getWidth(), getHeight());
 
             // Focus rectangle around selected lines
@@ -181,9 +199,9 @@ public final class TourOverlayManager {
             int y2 = p2.y - editor.getScrollingModel().getVisibleAreaOnScrollingFinished().y;
             int focusY = Math.max(0, y - 4);
             int focusH = Math.min(getHeight(), Math.max(20, y2 - y + 8));
-            g2.setColor(new Color(255, 255, 255, 40));
+            g2.setColor(new JBColor(new Color(255, 255, 255, 40), new Color(255, 255, 255, 40)));
             g2.fillRoundRect(8, focusY, getWidth() - 16, focusH, 8, 8);
-            g2.setColor(new Color(0,120,215));
+            g2.setColor(new JBColor(new Color(0,120,215), new Color(0,120,215)));
             g2.setStroke(new BasicStroke(2f));
             g2.drawRoundRect(8, focusY, getWidth() - 16, focusH, 8, 8);
             g2.dispose();

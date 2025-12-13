@@ -356,43 +356,51 @@ public final class SelectionModeService implements Disposable {
             @Override public void componentResized(java.awt.event.ComponentEvent e) { relayout(); }
             @Override public void componentMoved(java.awt.event.ComponentEvent e) { relayout(); }
         };
-        private final com.intellij.openapi.editor.event.VisibleAreaListener visibleAreaListener = e -> relayout();
 
         FinishHud(Editor editor) {
             this.editor = editor;
             setLayout(null);
             setOpaque(false);
+
+            finishBtn.setText("Finish Tour");
             finishBtn.setBackground(new JBColor(new Color(0, 120, 215), new Color(0, 90, 180)));
-            finishBtn.setForeground(JBColor.WHITE);
+            finishBtn.setForeground(Color.WHITE);
+            finishBtn.setOpaque(true);
+            finishBtn.setBorderPainted(false);
+            finishBtn.setFont(finishBtn.getFont().deriveFont(Font.BOLD));
+            finishBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
             finishBtn.addActionListener(e -> performFinalize());
             add(finishBtn);
         }
 
         void attach() {
-            JRootPane root = SwingUtilities.getRootPane(editor.getContentComponent());
+            JComponent comp = editor.getComponent();
+            JRootPane root = SwingUtilities.getRootPane(comp);
             if (root == null) return;
             JLayeredPane layered = root.getLayeredPane();
             if (getParent() != layered) layered.add(this, JLayeredPane.POPUP_LAYER);
+            comp.addComponentListener(compListener);
             relayout();
-            editor.getContentComponent().addComponentListener(compListener);
-            editor.getScrollingModel().addVisibleAreaListener(visibleAreaListener);
         }
 
         void detach() {
             Container p = getParent();
             if (p != null) p.remove(this);
-            try { editor.getContentComponent().removeComponentListener(compListener); } catch (Throwable ignore) {}
-            try { editor.getScrollingModel().removeVisibleAreaListener(visibleAreaListener); } catch (Throwable ignore) {}
+            editor.getComponent().removeComponentListener(compListener);
         }
 
         private void relayout() {
-            JRootPane root = SwingUtilities.getRootPane(editor.getContentComponent());
+            JComponent comp = editor.getComponent();
+            JRootPane root = SwingUtilities.getRootPane(comp);
             if (root == null) return;
             JLayeredPane layered = root.getLayeredPane();
-            Rectangle r = SwingUtilities.convertRectangle(editor.getContentComponent(), editor.getContentComponent().getBounds(), layered);
-            setBounds(r);
+
+            Point pt = SwingUtilities.convertPoint(comp, 0, 0, layered);
+            setBounds(pt.x, pt.y, comp.getWidth(), comp.getHeight());
+
             int btnW = 140, btnH = 30;
-            finishBtn.setBounds(r.width - btnW - 20, 20, btnW, btnH);
+            finishBtn.setBounds(getWidth() - btnW - 20, getHeight() - btnH - 20, btnW, btnH);
             revalidate();
             repaint();
         }
