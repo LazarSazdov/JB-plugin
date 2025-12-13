@@ -120,8 +120,19 @@ public final class TourOverlayManager {
             this.total = total;
             String label = "Step " + index + " of " + total + (step.symbolName() != null ? ": " + step.symbolName() : "");
             stepLabel.setText(label);
-            String content = step.aiExplanation() != null && !step.aiExplanation().isBlank() ? step.aiExplanation()
-                    : ("<h3>" + (step.authorNote() == null ? "" : escape(step.authorNote())) + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
+
+            // Build content - only show what's available
+            String content;
+            if (step.aiExplanation() != null && !step.aiExplanation().isBlank()) {
+                content = step.aiExplanation();
+            } else if (step.authorNote() != null && !step.authorNote().isBlank()) {
+                // Only show author note if it exists, no code section
+                content = "<p>" + escape(step.authorNote()) + "</p>";
+            } else {
+                // No content to display
+                content = "";
+            }
+
             html.setText("<html><body>" + content + "</body></html>");
             html.setCaretPosition(0);
             // Show Finish on last step

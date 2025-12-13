@@ -19,6 +19,9 @@
 
         <!-- Documentation Integration (New API) -->
         <platform.backend.documentation.targetProvider implementation="com.hackathon.doc.TourDocTargetProvider"/>
+
+        <!-- Notification Group for tour events -->
+        <notificationGroup id="Auto Code Walker" displayType="BALLOON"/>
     </extensions>
 
     <actions>

@@ -11,8 +11,6 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-
 public class TourToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -32,18 +30,12 @@ public class TourToolWindowFactory implements ToolWindowFactory {
                     boolean isVisible = tw.isVisible();
                     if (isVisible != wasVisible) {
                         wasVisible = isVisible;
-                        if (!isVisible) {
-                            TourOverlayManager.hideAll();
-                        } else {
+                        if (isVisible) {
                             // Restore highlight if we have a current step
                             TourStateService state = project.getService(TourStateService.class);
                             TourStep current = state.getCurrentStep();
                             if (current != null) {
                                 EditorNavigationService.navigateToStep(project, current);
-                                com.intellij.openapi.editor.Editor editor = com.intellij.openapi.fileEditor.FileEditorManager.getInstance(project).getSelectedTextEditor();
-                                if (editor != null) {
-                                    TourOverlayManager.show(project, editor, current, state.getCurrentStepIndex() + 1, state.getSteps().size());
-                                }
                             }
                         }
                     }

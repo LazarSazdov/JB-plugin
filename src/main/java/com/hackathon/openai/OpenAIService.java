@@ -31,11 +31,15 @@ public final class OpenAIService {
     public @NotNull ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
         String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
-            // Fallback local explanation
+            // Fallback local explanation - only show author note if present
             String title = "Auto Code Walker Tour";
-            String html = "<h3>Author Note</h3><p>" + escape(note) + "</p>" +
-                    "<h3>Code</h3><pre>" + escape(code) + "</pre>" +
-                    "<p><em>(Set OPENAI_API_KEY to enable AI explanations.)</em></p>";
+            String html;
+            if (note != null && !note.isBlank()) {
+                html = "<p>" + escape(note) + "</p>";
+            } else {
+                html = "";
+            }
+            html += "<p><em>(Set OPENAI_API_KEY to enable AI explanations.)</em></p>";
             return new ExplanationResult(title, html);
         }
 
@@ -97,9 +101,13 @@ public final class OpenAIService {
         }
 
         String title = "Auto Code Walker Tour";
-        String html = "<h3>Author Note</h3><p>" + escape(note) + "</p>" +
-                "<h3>Code</h3><pre>" + escape(code) + "</pre>" +
-                "<p><em>(AI request failed.)</em></p>";
+        String html;
+        if (note != null && !note.isBlank()) {
+            html = "<p>" + escape(note) + "</p>";
+        } else {
+            html = "";
+        }
+        html += "<p><em>(AI request failed.)</em></p>";
         return new ExplanationResult(title, html);
     }
 

@@ -3,7 +3,6 @@ package com.hackathon.actions;
 import com.hackathon.service.EditorNavigationService;
 import com.hackathon.service.SelectionModeService;
 import com.hackathon.service.TourStateService;
-import com.hackathon.ui.TourOverlayManager;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -46,7 +45,6 @@ public class EndTourAction extends AnAction {
         state.clear(); // Clear steps and index
 
         EditorNavigationService.clearHighlight();
-        TourOverlayManager.hideAll();
 
         // Hide tool window
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Auto Code Walker");
