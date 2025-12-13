@@ -112,8 +112,17 @@ public final class SelectionModeService implements Disposable {
             // Build TourStep
             Document doc = editor.getDocument();
             TextRange range = target.getTextRange();
-            int startLine0 = doc.getLineNumber(range.getStartOffset());
-            int endLine0 = doc.getLineNumber(range.getEndOffset());
+            // Use navigation offset for the start so we don't include leading Javadoc/comments.
+            int navStartOffset = (target instanceof PsiClass || target instanceof PsiMethod)
+                    ? target.getTextOffset()
+                    : range.getStartOffset();
+            int startLine0 = doc.getLineNumber(navStartOffset);
+
+            // Range end is exclusive; convert to inclusive to avoid selecting the next blank line.
+            int exclusiveEnd = range.getEndOffset();
+            int inclusiveEnd = Math.max(navStartOffset, exclusiveEnd - 1);
+            int endLine0 = doc.getLineNumber(inclusiveEnd);
+
             String code = doc.getText(new TextRange(doc.getLineStartOffset(startLine0), doc.getLineEndOffset(endLine0)));
             VirtualFile vFile = psiFile.getVirtualFile();
             if (vFile == null) return;
@@ -157,28 +166,26 @@ public final class SelectionModeService implements Disposable {
         PsiElement leaf = file.findElementAt(offset);
         if (leaf == null) return null;
 
-        PsiMethod outerMostMethod = null;
-        PsiClass outerMostNonAnonClass = null;
+        PsiMethod methodCandidate = null;    // nearest non-anonymous, non-local method
+        PsiClass classCandidate = null;      // nearest non-anonymous class
 
         for (PsiElement cur = leaf; cur != null; cur = cur.getParent()) {
-            if (cur instanceof PsiMethod m) {
+            if (methodCandidate == null && cur instanceof PsiMethod m) {
                 PsiClass cls = m.getContainingClass();
                 boolean inAnonymous = cls instanceof PsiAnonymousClass;
-                boolean methodInsideAnotherMethod = com.intellij.psi.util.PsiTreeUtil.getParentOfType(m, PsiMethod.class, true) != null;
                 boolean classInsideMethod = cls != null && com.intellij.psi.util.PsiTreeUtil.getParentOfType(cls, PsiMethod.class, true) != null;
-                // Skip overridden/inner methods declared inside anonymous or local classes within an outer method
-                if (!inAnonymous && !methodInsideAnotherMethod && !classInsideMethod) {
-                    outerMostMethod = m; // keep updating to capture the top-most method on the way up
+                if (!inAnonymous && !classInsideMethod) {
+                    methodCandidate = m; // pick the first (nearest) matching method
                 }
-            } else if (cur instanceof PsiClass c) {
+            } else if (classCandidate == null && cur instanceof PsiClass c) {
                 if (!(c instanceof PsiAnonymousClass)) {
-                    outerMostNonAnonClass = c; // keep updating to capture the outer-most class
+                    classCandidate = c; // pick the first (nearest) named class
                 }
             }
         }
 
-        if (outerMostMethod != null) return outerMostMethod;
-        if (outerMostNonAnonClass != null) return outerMostNonAnonClass;
+        if (methodCandidate != null) return methodCandidate;
+        if (classCandidate != null) return classCandidate;
 
         // Fallback to nearest method/class (even if anonymous) to avoid nulls
         PsiElement el = leaf;
