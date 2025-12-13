@@ -87,9 +87,23 @@ public class TourToolWindow {
     private void updateHtml(TourStep step) {
         TourStateService state = project.getService(TourStateService.class);
         titleLabel.setText("Auto Code Walker: " + state.getTitle());
-        String html = step.aiExplanation() != null && !step.aiExplanation().isBlank()
-                ? step.aiExplanation()
-                : ("<h3>" + step.authorNote() + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
+
+        StringBuilder sb = new StringBuilder();
+        String note = step.authorNote();
+        if (note != null && !note.isBlank()) {
+            sb.append("<h3>Author Note</h3><p>").append(note).append("</p>");
+        }
+
+        String ai = step.aiExplanation();
+        if (ai != null && !ai.isBlank()) {
+            sb.append(ai);
+        }
+
+        String html = sb.toString();
+        if (html.isBlank()) {
+            html = "<p><em>No explanation available.</em></p>";
+        }
+
         htmlPane.setText("<html><body>" + html + "</body></html>");
         htmlPane.setCaretPosition(0);
 

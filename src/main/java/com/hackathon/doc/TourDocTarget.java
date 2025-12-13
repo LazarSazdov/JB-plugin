@@ -31,9 +31,21 @@ public class TourDocTarget implements DocumentationTarget {
 
     @Override
     public @Nullable DocumentationResult computeDocumentation() {
-        String html = step.aiExplanation() != null && !step.aiExplanation().isBlank()
-                ? step.aiExplanation()
-                : ("<h3>" + step.authorNote() + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
+        StringBuilder sb = new StringBuilder();
+        String note = step.authorNote();
+        if (note != null && !note.isBlank()) {
+            sb.append("<h3>Author Note</h3><p>").append(note).append("</p>");
+        }
+
+        String ai = step.aiExplanation();
+        if (ai != null && !ai.isBlank()) {
+            sb.append(ai);
+        }
+
+        String html = sb.toString();
+        if (html.isBlank()) {
+            html = "<p><em>No explanation available.</em></p>";
+        }
         return DocumentationResult.documentation(html);
     }
 
@@ -43,9 +55,5 @@ public class TourDocTarget implements DocumentationTarget {
                 ? step.authorNote()
                 : "Tour Step (line " + step.lineNum() + ")";
         return TargetPresentation.builder(text).presentation();
-    }
-
-    private static String escape(String s) {
-        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 }

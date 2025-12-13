@@ -31,12 +31,8 @@ public final class OpenAIService {
     public @NotNull ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
         String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
-            // Fallback local explanation
-            String title = "Auto Code Walker Tour";
-            String html = "<h3>Author Note</h3><p>" + escape(note) + "</p>" +
-                    "<h3>Code</h3><pre>" + escape(code) + "</pre>" +
-                    "<p><em>(Set OPENAI_API_KEY to enable AI explanations.)</em></p>";
-            return new ExplanationResult(title, html);
+            // No API key, return null for AI explanation
+            return new ExplanationResult("Auto Code Walker Tour", null);
         }
 
         try {
@@ -96,11 +92,8 @@ public final class OpenAIService {
             // ignore and fall back
         }
 
-        String title = "Auto Code Walker Tour";
-        String html = "<h3>Author Note</h3><p>" + escape(note) + "</p>" +
-                "<h3>Code</h3><pre>" + escape(code) + "</pre>" +
-                "<p><em>(AI request failed.)</em></p>";
-        return new ExplanationResult(title, html);
+        // AI request failed, return null for AI explanation
+        return new ExplanationResult("Auto Code Walker Tour", null);
     }
 
     private static String escape(String s) {
