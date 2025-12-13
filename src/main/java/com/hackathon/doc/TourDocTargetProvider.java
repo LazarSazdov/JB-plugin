@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.platform.backend.documentation.DocumentationTarget;
-import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider;
+import com.intellij.platform.backend.documentation.DocumentationTargetProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-public class TourDocTargetProvider implements PsiDocumentationTargetProvider {
+public class TourDocTargetProvider implements DocumentationTargetProvider {
+    @Override
     public @NotNull List<? extends DocumentationTarget> documentationTargets(@NotNull PsiFile file, @NotNull Editor editor, int offset) {
         Project project = file.getProject();
         TourStateService state = project.getService(TourStateService.class);

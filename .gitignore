@@ -5,3 +5,13 @@
 .kotlin
 .qodana
 build
+
+# User specific
+.env
+local.properties
+
+# OS
+Thumbs.db
+
+# Heap dumps
+*.hprof

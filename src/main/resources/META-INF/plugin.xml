@@ -18,7 +18,7 @@
                     anchor="right"/>
 
         <!-- Documentation Integration (New API) -->
-        <platform.backend.documentation.psiTargetProvider implementation="com.hackathon.doc.TourDocTargetProvider"/>
+        <platform.backend.documentation.targetProvider implementation="com.hackathon.doc.TourDocTargetProvider"/>
     </extensions>
 
     <actions>
