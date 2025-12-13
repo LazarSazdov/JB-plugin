@@ -2,9 +2,9 @@ package com.hackathon.actions;
 
 import com.hackathon.service.SelectionModeService;
 import com.hackathon.service.TourStateService;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +13,11 @@ import org.jetbrains.annotations.NotNull;
  * Clears all current tour selections while in selection mode.
  */
 public class ClearTourSelectionsAction extends AnAction {
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
     @Override
     public void update(@NotNull AnActionEvent e) {
         Project project = e.getProject();

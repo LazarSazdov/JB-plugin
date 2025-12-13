@@ -15,6 +15,7 @@ public class TourToolWindow {
     private final JEditorPane htmlPane;
     private final JButton prevBtn;
     private final JButton nextBtn;
+    private final JButton finishBtn;
 
     public TourToolWindow(Project project) {
         this.project = project;
@@ -32,8 +33,10 @@ public class TourToolWindow {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
         prevBtn = new JButton("Prev");
         nextBtn = new JButton("Next");
+        finishBtn = new JButton("Finish Tour");
         controls.add(prevBtn);
         controls.add(nextBtn);
+        controls.add(finishBtn);
         root.add(controls, BorderLayout.SOUTH);
 
         prevBtn.addActionListener(e -> {
@@ -53,6 +56,8 @@ public class TourToolWindow {
             }
         });
 
+        finishBtn.addActionListener(e -> finishTour());
+
         refresh();
     }
 
@@ -64,16 +69,26 @@ public class TourToolWindow {
             updateHtml(current);
         } else {
             htmlPane.setText("<html><body><p>No steps yet. Use editor popup: Add Tour Step.</p></body></html>");
+            finishBtn.setVisible(false);
+            nextBtn.setVisible(true);
         }
     }
 
     private void updateHtml(TourStep step) {
-        titleLabel.setText("Auto Code Walker: " + project.getService(TourStateService.class).getTitle());
+        TourStateService state = project.getService(TourStateService.class);
+        titleLabel.setText("Auto Code Walker: " + state.getTitle());
         String html = step.aiExplanation() != null && !step.aiExplanation().isBlank()
                 ? step.aiExplanation()
                 : ("<h3>" + step.authorNote() + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
         htmlPane.setText("<html><body>" + html + "</body></html>");
         htmlPane.setCaretPosition(0);
+
+        // Show Finish only on last step
+        int idx = state.getCurrentStepIndex();
+        int total = state.getSteps().size();
+        boolean isLast = idx == total - 1;
+        finishBtn.setVisible(isLast);
+        nextBtn.setVisible(!isLast);
     }
 
     private static String escape(String s) {
@@ -82,5 +97,14 @@ public class TourToolWindow {
 
     public JComponent getComponent() {
         return root;
+    }
+
+    private void finishTour() {
+        // Optionally hide the tool window after finishing
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            com.intellij.openapi.wm.ToolWindow tw = com.intellij.openapi.wm.ToolWindowManager.getInstance(project).getToolWindow("Auto Code Walker");
+            if (tw != null) tw.hide(null);
+        });
+        javax.swing.JOptionPane.showMessageDialog(null, "Tour finished.", "Auto Code Walker", javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 }

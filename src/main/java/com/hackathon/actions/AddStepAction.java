@@ -4,6 +4,7 @@ import com.hackathon.model.TourStep;
 import com.hackathon.openai.OpenAIService;
 import com.hackathon.service.TourStateService;
 import com.hackathon.ui.StepCreationDialog;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -18,9 +19,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class AddStepAction extends AnAction {
     @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    @Override
     public void update(@NotNull AnActionEvent e) {
         Editor editor = e.getData(CommonDataKeys.EDITOR);
-        e.getPresentation().setEnabledAndVisible(editor != null);
+        boolean visible = false;
+        if (editor != null && editor.getProject() != null) {
+            com.hackathon.service.SelectionModeService sel = editor.getProject().getService(com.hackathon.service.SelectionModeService.class);
+            visible = sel != null && sel.isEnabled();
+        }
+        e.getPresentation().setEnabledAndVisible(visible);
     }
 
     @Override

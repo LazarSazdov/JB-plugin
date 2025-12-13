@@ -6,6 +6,7 @@ import com.hackathon.model.TourStep;
 import com.hackathon.openai.OpenAIService;
 import com.hackathon.service.SelectionModeService;
 import com.hackathon.service.TourStateService;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -25,14 +26,25 @@ public class FinalizeTourAction extends AnAction {
     private final Gson gson = new Gson();
 
     @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    @Override
     public void update(@NotNull AnActionEvent e) {
         Project project = e.getProject();
-        boolean enable = false;
+        boolean visible = false;
+        boolean enabled = true;
         if (project != null) {
+            // Visible while selection mode is ON so the user always sees a Finish entry.
+            com.hackathon.service.SelectionModeService sel = project.getService(com.hackathon.service.SelectionModeService.class);
+            visible = sel != null && sel.isEnabled();
+            // Enabled if there is at least one selection; otherwise we still show it but it will inform the user.
             TourStateService state = project.getService(TourStateService.class);
-            enable = state != null && !state.getSteps().isEmpty();
+            enabled = state != null && !state.getSteps().isEmpty();
         }
-        e.getPresentation().setEnabledAndVisible(enable);
+        e.getPresentation().setVisible(visible);
+        e.getPresentation().setEnabled(enabled);
     }
 
     @Override
@@ -59,7 +71,7 @@ public class FinalizeTourAction extends AnAction {
         }
 
         String suggested = title == null || title.isBlank() ? "Auto Code Walker Tour" : title;
-        String input = Messages.showInputDialog(project, "Tour Title:", "Create Tour", null, suggested, null);
+        String input = Messages.showInputDialog(project, "Tour title:", "Create Tour", null, suggested, null);
         if (input != null && !input.isBlank()) title = input.trim();
         state.setTour(new Tour(title, updated));
 
@@ -68,7 +80,7 @@ public class FinalizeTourAction extends AnAction {
         File out = new File(basePath, "tour.json");
         if (out.exists()) {
             int choice = Messages.showYesNoDialog(project,
-                    "tour.json already exists in project root. Overwrite?",
+                    "File tour.json already exists in project root. Overwrite?",
                     "Create Tour",
                     "Overwrite",
                     "Cancel",

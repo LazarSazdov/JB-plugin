@@ -21,14 +21,14 @@ public final class OpenAIService {
             .build();
     private final Gson gson = new Gson();
 
-    public static record ExplanationResult(String title, String htmlContent) {}
+    public record ExplanationResult(String title, String htmlContent) {}
 
     /**
      * Generate HTML explanation for a code snippet with an author note.
      * Requirements: explanation must be precise and include at least one concrete usage example.
      * Uses response_format json_object to get back {"title": ..., "html_content": ...}.
      */
-    public @Nullable ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
+    public @NotNull ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
         String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
             // Fallback local explanation
@@ -75,7 +75,7 @@ public final class OpenAIService {
             if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
                 JsonObject root = gson.fromJson(resp.body(), JsonObject.class);
                 JsonArray choices = root.getAsJsonArray("choices");
-                if (choices != null && choices.size() > 0) {
+                if (choices != null && !choices.isEmpty()) {
                     JsonObject msg = choices.get(0).getAsJsonObject().getAsJsonObject("message");
                     if (msg != null) {
                         String content = msg.get("content").getAsString();

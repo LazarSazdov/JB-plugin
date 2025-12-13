@@ -45,6 +45,7 @@ public final class TourOverlayManager {
         private final JPanel infoPanel = new JPanel(new BorderLayout(8, 8));
         private final JButton nextButton = new JButton("Next");
         private final JButton prevButton = new JButton("Prev");
+        private final JButton finishButton = new JButton("Finish Tour");
         private final JLabel stepLabel = new JLabel();
         private final JEditorPane html = new JEditorPane("text/html", "");
         private TourStep step;
@@ -70,16 +71,20 @@ public final class TourOverlayManager {
             buttons.add(close);
             buttons.add(prevButton);
             buttons.add(nextButton);
+            buttons.add(finishButton);
             nextButton.setBackground(new Color(0,120,215));
             nextButton.setForeground(Color.WHITE);
-            prevButton.setBackground(new Color(0,120,215));
-            prevButton.setForeground(Color.WHITE);
+            prevButton.setBackground(new Color(220,220,220));
+            prevButton.setForeground(Color.BLACK);
+            finishButton.setBackground(new Color(0,120,215));
+            finishButton.setForeground(Color.WHITE);
             top.add(buttons, BorderLayout.EAST);
             infoPanel.add(top, BorderLayout.NORTH);
             infoPanel.add(new JScrollPane(html), BorderLayout.CENTER);
 
             nextButton.addActionListener(e -> doNext());
             prevButton.addActionListener(e -> doPrev());
+            finishButton.addActionListener(e -> doClose());
 
             // Keyboard navigation & close
             registerKey("OVERLAY_CLOSE", KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), this::doClose);
@@ -98,6 +103,10 @@ public final class TourOverlayManager {
                     : ("<h3>" + (step.authorNote() == null ? "" : escape(step.authorNote())) + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
             html.setText("<html><body>" + content + "</body></html>");
             html.setCaretPosition(0);
+            // Show Finish on last step
+            boolean isLast = index >= total;
+            nextButton.setVisible(!isLast);
+            finishButton.setVisible(isLast);
         }
 
         // Listeners to keep overlay in sync with editor viewport/size
@@ -137,10 +146,20 @@ public final class TourOverlayManager {
         private void updateBounds(JLayeredPane layered) {
             Rectangle r = SwingUtilities.convertRectangle(editor.getContentComponent(), editor.getContentComponent().getBounds(), layered);
             setBounds(r);
-            // Place info panel at top-right inside overlay margin
+            // Compute focus rect vertical position to place panel near the explained code
+            int startLine0 = step != null ? Math.max(0, step.lineNum() - 1) : 0;
+            int endLine0 = step != null && step.endLine() != null ? Math.max(startLine0, step.endLine() - 1) : startLine0;
+            Point p1 = editor.logicalPositionToXY(new LogicalPosition(startLine0, 0));
+            Point p2 = editor.logicalPositionToXY(new LogicalPosition(endLine0 + 1, 0));
+            int visY = editor.getScrollingModel().getVisibleAreaOnScrollingFinished().y;
+            int focusY = Math.max(0, p1.y - visY - 4);
+            int focusH = Math.max(20, p2.y - p1.y + 8);
+
             int panelW = Math.min(450, r.width - 40);
             int panelH = Math.min(260, r.height - 40);
-            infoPanel.setBounds(r.width - panelW - 20, 20, panelW, panelH);
+            int y = Math.max(20, Math.min(r.height - panelH - 20, focusY));
+            // Prefer to the right side as a floating textbox near the focus lines
+            infoPanel.setBounds(r.width - panelW - 20, y, panelW, panelH);
             if (infoPanel.getParent() != this) add(infoPanel);
         }
 

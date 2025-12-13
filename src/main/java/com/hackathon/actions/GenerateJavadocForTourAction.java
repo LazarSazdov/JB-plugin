@@ -69,39 +69,33 @@ public class GenerateJavadocForTourAction extends AnAction {
         return el;
     }
 
-    // Build only our ACW block with markers, preserve user tags elsewhere
+    // Build only our ACW block with markers: include AI explanation text and the author's note. No code blocks.
     private static String buildAcwBlockFromHtml(TourStep step) {
         String html = step.aiExplanation();
-        if (html == null || html.isBlank()) return null;
-        String summary = html.replaceAll("(?is)<script.*?</script>", "")
-                .replaceAll("(?is)<style.*?</style>", "")
-                .replaceAll("(?is)</?body>", "")
-                .replaceAll("(?is)</?html>", "")
-                .replaceAll("(?is)<h[12][^>]*>(.*?)</h[12]>", "$1: ");
+        if (html == null) html = "";
+        String authorNote = step.authorNote() == null ? "" : step.authorNote();
 
-        // Extract first <pre><code> ... </code></pre>
-        Pattern p = Pattern.compile("(?is)<pre>\\s*<code[^>]*>(.*?)</code>\\s*</pre>");
-        Matcher m = p.matcher(html);
-        String code = null;
-        if (m.find()) {
-            code = m.group(1)
-                    .replaceAll("&lt;", "<")
-                    .replaceAll("&gt;", ">")
-                    .replaceAll("&amp;", "&");
-        }
+        // Strip tags to plain text for Javadoc body
+        String text = html
+                .replaceAll("(?is)<script.*?</script>", "")
+                .replaceAll("(?is)<style.*?</style>", "")
+                .replaceAll("(?is)<[^>]+>", "")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&");
 
         StringBuilder sb = new StringBuilder();
         sb.append(" * <ACW-BEGIN>\n");
-        for (String line : escapeForJavadoc(summary).split("\r?\n")) {
-            sb.append(" * ").append(line).append("\n");
+        if (!text.isBlank()) {
+            for (String line : escapeForJavadoc(text).split("\r?\n")) {
+                if (!line.isBlank()) sb.append(" * ").append(line).append("\n");
+            }
         }
-        if (code != null && !code.isBlank()) {
-            sb.append(" * <p>Usage example:</p>\n");
-            sb.append(" * <pre><code>\n");
-            for (String line : code.split("\r?\n")) {
+        if (!authorNote.isBlank()) {
+            sb.append(" * <p>Author note:</p>\n");
+            for (String line : authorNote.split("\r?\n")) {
                 sb.append(" * ").append(escapeForJavadoc(line)).append("\n");
             }
-            sb.append(" * </code></pre>\n");
         }
         sb.append(" * <ACW-END>\n");
         return sb.toString();
@@ -119,21 +113,7 @@ public class GenerateJavadocForTourAction extends AnAction {
         docText.append("/**\n");
 
         if (existing != null) {
-            // Remove previous ACW block from existing description
-            String[] lines = existing.getText().split("\r?\n");
-            boolean inAcw = false;
-            for (String line : lines) {
-                String trimmed = line.trim();
-                if (trimmed.startsWith("/**") || trimmed.equals("*/")) continue; // skip comment markers
-                if (trimmed.contains("<ACW-BEGIN>")) { inAcw = true; continue; }
-                if (trimmed.contains("<ACW-END>")) { inAcw = false; continue; }
-                if (!inAcw && !trimmed.startsWith("*@")) {
-                    // keep non-tag description lines other than ACW? We'll prefer our ACW block as description
-                    // so skip old description to avoid duplication
-                }
-            }
-
-            // Add our ACW block as the main description
+            // Add our ACW block as the main description, replacing old description
             docText.append(acwBlock);
 
             // Preserve tags

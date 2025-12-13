@@ -5,14 +5,16 @@ import com.hackathon.model.Tour;
 import com.hackathon.model.TourStep;
 import com.hackathon.service.EditorNavigationService;
 import com.hackathon.service.TourStateService;
-import com.hackathon.ui.TourOverlayManager;
+import com.hackathon.ui.TourToolWindow;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -23,12 +25,18 @@ public class StartTourAction extends AnAction {
     private final Gson gson = new Gson();
 
     @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    @Override
     public void update(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         boolean visible = false;
         if (project != null && project.getBasePath() != null) {
-            File f = new File(project.getBasePath(), ".codewalker/tour.json");
-            visible = f.exists();
+            File f1 = new File(project.getBasePath(), "tour.json");
+            File f2 = new File(project.getBasePath(), ".codewalker/tour.json");
+            visible = f1.exists() || f2.exists();
         }
         e.getPresentation().setEnabledAndVisible(visible);
     }
@@ -42,10 +50,15 @@ public class StartTourAction extends AnAction {
             Messages.showErrorDialog(project, "No project base path.", "Start Tour");
             return;
         }
-        File tourFile = new File(base, ".codewalker/tour.json");
+        File tourFile = new File(base, "tour.json");
         if (!tourFile.exists()) {
-            Messages.showErrorDialog(project, "No tour found at .codewalker/tour.json", "Start Tour");
-            return;
+            File alt = new File(base, ".codewalker/tour.json");
+            if (alt.exists()) {
+                tourFile = alt;
+            } else {
+                Messages.showErrorDialog(project, "No tour.json found in project root.", "Start Tour");
+                return;
+            }
         }
         try (FileReader fr = new FileReader(tourFile, StandardCharsets.UTF_8)) {
             Tour tour = gson.fromJson(fr, Tour.class);
@@ -58,10 +71,19 @@ public class StartTourAction extends AnAction {
             TourStep step = state.getCurrentStep();
             if (step == null) return;
             EditorNavigationService.navigateToStep(project, step);
-            Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-            if (editor == null) editor = e.getData(CommonDataKeys.EDITOR);
-            if (editor != null) {
-                TourOverlayManager.show(project, editor, step, state.getCurrentStepIndex() + 1, state.getSteps().size());
+
+            // Activate/show the right-side tool window and refresh its content
+            ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Auto Code Walker");
+            if (toolWindow != null) {
+                toolWindow.activate(() -> {
+                    var cm = toolWindow.getContentManager();
+                    cm.removeAllContents(true);
+                    TourToolWindow panel = new TourToolWindow(project);
+                    Content content = ContentFactory.getInstance().createContent(panel.getComponent(), "Tour", false);
+                    cm.addContent(content);
+                }, true);
+            } else {
+                Messages.showWarningDialog(project, "Tool window 'Auto Code Walker' not available.", "Start Tour");
             }
         } catch (Exception ex) {
             Messages.showErrorDialog(project, "Failed to load tour.json: " + ex.getMessage(), "Start Tour");

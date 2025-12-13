@@ -10,6 +10,14 @@ import com.intellij.openapi.editor.event.EditorFactoryListener;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.markup.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
+import com.intellij.openapi.actionSystem.ActionUiKind;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -38,6 +46,7 @@ public final class SelectionModeService implements Disposable {
 
     // Store editor-specific highlighters to clear on disable or editor disposal
     private final Map<Editor, List<RangeHighlighter>> editorHighlighters = new ConcurrentHashMap<>();
+    private final Map<Editor, FinishHud> finishHuds = new ConcurrentHashMap<>();
 
     public SelectionModeService(Project project) {
         this.project = project;
@@ -48,7 +57,10 @@ public final class SelectionModeService implements Disposable {
             public void editorCreated(@NotNull EditorFactoryEvent event) {
                 Editor editor = event.getEditor();
                 editor.addEditorMouseListener(editorMouseListener);
-                if (enabled) refreshEditorHighlighters(editor);
+                if (enabled) {
+                    refreshEditorHighlighters(editor);
+                    attachFinishHud(editor);
+                }
             }
 
             @Override
@@ -56,8 +68,14 @@ public final class SelectionModeService implements Disposable {
                 Editor editor = event.getEditor();
                 clearHighlighters(editor);
                 editor.removeEditorMouseListener(editorMouseListener);
+                detachFinishHud(editor);
             }
         }, this);
+
+        // Also attach listeners to already open editors (users may enable plugin mid-session)
+        for (Editor ed : com.intellij.openapi.editor.EditorFactory.getInstance().getAllEditors()) {
+            ed.addEditorMouseListener(editorMouseListener);
+        }
     }
 
     public boolean isEnabled() { return enabled; }
@@ -67,9 +85,14 @@ public final class SelectionModeService implements Disposable {
         this.enabled = enable;
         if (!enable) {
             clearAllHighlighters();
+            // remove HUDs
+            for (Editor ed : new ArrayList<>(finishHuds.keySet())) {
+                detachFinishHud(ed);
+            }
         } else {
             for (Editor editor : com.intellij.openapi.editor.EditorFactory.getInstance().getAllEditors()) {
                 refreshEditorHighlighters(editor);
+                attachFinishHud(editor);
             }
         }
     }
@@ -131,7 +154,34 @@ public final class SelectionModeService implements Disposable {
     }
 
     private static PsiElement findEnclosingSymbol(PsiFile file, int offset) {
-        PsiElement el = file.findElementAt(offset);
+        PsiElement leaf = file.findElementAt(offset);
+        if (leaf == null) return null;
+
+        PsiMethod outerMostMethod = null;
+        PsiClass outerMostNonAnonClass = null;
+
+        for (PsiElement cur = leaf; cur != null; cur = cur.getParent()) {
+            if (cur instanceof PsiMethod m) {
+                PsiClass cls = m.getContainingClass();
+                boolean inAnonymous = cls instanceof PsiAnonymousClass;
+                boolean methodInsideAnotherMethod = com.intellij.psi.util.PsiTreeUtil.getParentOfType(m, PsiMethod.class, true) != null;
+                boolean classInsideMethod = cls != null && com.intellij.psi.util.PsiTreeUtil.getParentOfType(cls, PsiMethod.class, true) != null;
+                // Skip overridden/inner methods declared inside anonymous or local classes within an outer method
+                if (!inAnonymous && !methodInsideAnotherMethod && !classInsideMethod) {
+                    outerMostMethod = m; // keep updating to capture the top-most method on the way up
+                }
+            } else if (cur instanceof PsiClass c) {
+                if (!(c instanceof PsiAnonymousClass)) {
+                    outerMostNonAnonClass = c; // keep updating to capture the outer-most class
+                }
+            }
+        }
+
+        if (outerMostMethod != null) return outerMostMethod;
+        if (outerMostNonAnonClass != null) return outerMostNonAnonClass;
+
+        // Fallback to nearest method/class (even if anonymous) to avoid nulls
+        PsiElement el = leaf;
         while (el != null && !(el instanceof PsiMethod) && !(el instanceof PsiClass)) {
             el = el.getParent();
         }
@@ -157,7 +207,7 @@ public final class SelectionModeService implements Disposable {
             }
         }
         PsiElement prev = el.getPrevSibling();
-        while (prev != null && (prev instanceof PsiWhiteSpace)) prev = prev.getPrevSibling();
+        while (prev instanceof PsiWhiteSpace) prev = prev.getPrevSibling();
         if (prev instanceof PsiComment c) {
             return c.getText();
         }
@@ -185,9 +235,14 @@ public final class SelectionModeService implements Disposable {
             int endOffset = document.getLineEndOffset(endLine0);
 
             TextAttributes attrs = new TextAttributes();
-            attrs.setBackgroundColor(new JBColor(new Color(200, 225, 255), new Color(60, 70, 80))); // light blue / dark mode
-            attrs.setEffectColor(JBColor.BLUE);
+            boolean isMethod = s.symbolName() != null && s.symbolName().contains("#");
+            // Softer, dimmer highlight colors; class=blue, method=green
+            JBColor bg = isMethod ? new JBColor(new Color(210, 245, 210), new Color(50, 70, 50))
+                                  : new JBColor(new Color(210, 230, 255), new Color(50, 60, 80));
+            attrs.setBackgroundColor(bg);
+            attrs.setEffectColor(isMethod ? new JBColor(new Color(0, 128, 0), new Color(120, 180, 120)) : JBColor.BLUE);
             attrs.setEffectType(EffectType.BOXED);
+            attrs.setFontType(Font.BOLD);
 
             MarkupModel markup = editor.getMarkupModel();
             RangeHighlighter rh = markup.addRangeHighlighter(startOffset, endOffset, HighlighterLayer.SELECTION - 2, attrs, HighlighterTargetArea.EXACT_RANGE);
@@ -223,6 +278,9 @@ public final class SelectionModeService implements Disposable {
     @Override
     public void dispose() {
         clearAllHighlighters();
+        for (Editor ed : new ArrayList<>(finishHuds.keySet())) {
+            detachFinishHud(ed);
+        }
     }
 
     /** Simple numbered icon for gutter. */
@@ -268,5 +326,82 @@ public final class SelectionModeService implements Disposable {
         }
         @Override public int getIconWidth() { return size; }
         @Override public int getIconHeight() { return size; }
+    }
+
+    // --- Finish HUD (blue "Finish Tour" button shown during selection mode) ---
+    private void attachFinishHud(Editor editor) {
+        if (editor == null || editor.getProject() == null) return;
+        if (finishHuds.containsKey(editor)) return;
+        FinishHud hud = new FinishHud(editor);
+        finishHuds.put(editor, hud);
+        hud.attach();
+    }
+
+    private void detachFinishHud(Editor editor) {
+        FinishHud hud = finishHuds.remove(editor);
+        if (hud != null) hud.detach();
+    }
+
+    private final class FinishHud extends JComponent {
+        private final Editor editor;
+        private final JButton finishBtn = new JButton("Finish Tour");
+        private final java.awt.event.ComponentListener compListener = new java.awt.event.ComponentAdapter() {
+            @Override public void componentResized(java.awt.event.ComponentEvent e) { relayout(); }
+            @Override public void componentMoved(java.awt.event.ComponentEvent e) { relayout(); }
+        };
+        private final com.intellij.openapi.editor.event.VisibleAreaListener visibleAreaListener = e -> relayout();
+
+        FinishHud(Editor editor) {
+            this.editor = editor;
+            setLayout(null);
+            setOpaque(false);
+            finishBtn.setBackground(new JBColor(new Color(0, 120, 215), new Color(0, 90, 180)));
+            finishBtn.setForeground(JBColor.WHITE);
+            finishBtn.addActionListener(e -> performFinalize());
+            add(finishBtn);
+        }
+
+        void attach() {
+            JRootPane root = SwingUtilities.getRootPane(editor.getContentComponent());
+            if (root == null) return;
+            JLayeredPane layered = root.getLayeredPane();
+            if (getParent() != layered) layered.add(this, JLayeredPane.POPUP_LAYER);
+            relayout();
+            editor.getContentComponent().addComponentListener(compListener);
+            editor.getScrollingModel().addVisibleAreaListener(visibleAreaListener);
+        }
+
+        void detach() {
+            Container p = getParent();
+            if (p != null) p.remove(this);
+            try { editor.getContentComponent().removeComponentListener(compListener); } catch (Throwable ignore) {}
+            try { editor.getScrollingModel().removeVisibleAreaListener(visibleAreaListener); } catch (Throwable ignore) {}
+        }
+
+        private void relayout() {
+            JRootPane root = SwingUtilities.getRootPane(editor.getContentComponent());
+            if (root == null) return;
+            JLayeredPane layered = root.getLayeredPane();
+            Rectangle r = SwingUtilities.convertRectangle(editor.getContentComponent(), editor.getContentComponent().getBounds(), layered);
+            setBounds(r);
+            int btnW = 140, btnH = 30;
+            finishBtn.setBounds(r.width - btnW - 20, 20, btnW, btnH);
+            revalidate();
+            repaint();
+        }
+
+        private void performFinalize() {
+            // Invoke FinalizeTourAction programmatically in the context of the editor
+            AnAction action = ActionManager.getInstance().getAction("com.hackathon.actions.FinalizeTourAction");
+            if (action != null) {
+                DataContext ctx = SimpleDataContext.builder()
+                        .add(CommonDataKeys.PROJECT, project)
+                        .add(CommonDataKeys.EDITOR, editor)
+                        .build();
+                AnActionEvent ev = AnActionEvent.createEvent(ctx, action.getTemplatePresentation(), "AutoCodeWalker.SelectionHud", ActionUiKind.NONE, null);
+                //noinspection deprecation
+                ActionUtil.performActionDumbAwareWithCallbacks(action, ev);
+            }
+        }
     }
 }

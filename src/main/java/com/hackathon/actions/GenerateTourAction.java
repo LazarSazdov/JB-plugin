@@ -29,15 +29,20 @@ public class GenerateTourAction extends AnAction {
             return;
         }
 
-        String title = Messages.showInputDialog(project, "Tour Title:", "Generate Tour JSON", null, state.getTitle(), null);
+        String title = Messages.showInputDialog(project, "Tour title:", "Generate Tour JSON", null, state.getTitle(), null);
         if (title == null) return;
         state.setTitle(title);
 
         File dir = new File(project.getBasePath(), ".codewalker");
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Messages.showErrorDialog(project, "Failed to create .codewalker directory.", "Generate Tour");
+                return;
+            }
+        }
         File file = new File(dir, "tour.json");
 
-        Tour tour = new Tour(title, new ArrayList<TourStep>(state.getSteps()));
+        Tour tour = new Tour(title, new ArrayList<>(state.getSteps()));
         try (FileWriter fw = new FileWriter(file, StandardCharsets.UTF_8)) {
             gson.toJson(tour, fw);
             Messages.showInfoMessage(project, "Tour saved to: " + file.getAbsolutePath(), "Generate Tour");
