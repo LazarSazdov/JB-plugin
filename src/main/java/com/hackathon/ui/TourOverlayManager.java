@@ -41,6 +41,12 @@ public final class TourOverlayManager {
         EditorNavigationService.clearHighlight();
     }
 
+    public static void hideAll() {
+        for (Editor editor : new HashMap<>(overlays).keySet()) {
+            hide(editor);
+        }
+    }
+
     static final class Overlay extends JComponent {
         private final Project project;
         private final Editor editor;

@@ -69,11 +69,27 @@
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
 
+        <!-- Exit Selection Mode -->
+        <action id="com.hackathon.actions.ExitSelectionModeAction"
+                class="com.hackathon.actions.ExitSelectionModeAction"
+                text="Exit Selection Mode"
+                description="Exit tour selection mode">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
         <!-- Start Tour overlay if tour.json exists in project root -->
         <action id="com.hackathon.actions.StartTourAction"
                 class="com.hackathon.actions.StartTourAction"
                 text="Start Tour"
                 description="Start an immersive tour overlay if tour.json exists">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <!-- End Tour -->
+        <action id="com.hackathon.actions.EndTourAction"
+                class="com.hackathon.actions.EndTourAction"
+                text="End Tour"
+                description="End the current tour">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
 

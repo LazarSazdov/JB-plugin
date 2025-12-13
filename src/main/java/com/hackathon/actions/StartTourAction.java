@@ -35,6 +35,20 @@ public class StartTourAction extends AnAction {
         Project project = e.getProject();
         boolean visible = false;
         if (project != null && project.getBasePath() != null) {
+            // Hide if selection mode is active
+            SelectionModeService sel = project.getService(SelectionModeService.class);
+            if (sel != null && sel.isEnabled()) {
+                e.getPresentation().setEnabledAndVisible(false);
+                return;
+            }
+
+            // Hide if tour is already active
+            TourStateService state = project.getService(TourStateService.class);
+            if (state != null && !state.getSteps().isEmpty()) {
+                e.getPresentation().setEnabledAndVisible(false);
+                return;
+            }
+
             File f1 = new File(project.getBasePath(), "tour.json");
             File f2 = new File(project.getBasePath(), ".codewalker/tour.json");
             visible = f1.exists() || f2.exists();
@@ -86,7 +100,7 @@ public class StartTourAction extends AnAction {
                 toolWindow.activate(() -> {
                     var cm = toolWindow.getContentManager();
                     cm.removeAllContents(true);
-                    TourToolWindow panel = new TourToolWindow(project);
+                    TourToolWindow panel = new TourToolWindow(project, toolWindow);
                     Content content = ContentFactory.getInstance().createContent(panel.getComponent(), "Tour", false);
                     cm.addContent(content);
                 }, true);

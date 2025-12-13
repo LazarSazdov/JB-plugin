@@ -85,4 +85,12 @@ public final class TourStateService {
         }
         return null;
     }
+
+    public void reset() {
+        if (!steps.isEmpty()) {
+            currentStepIndex = 0;
+        } else {
+            currentStepIndex = -1;
+        }
+    }
 }

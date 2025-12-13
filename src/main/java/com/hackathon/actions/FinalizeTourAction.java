@@ -63,8 +63,8 @@ public class FinalizeTourAction extends AnAction {
         String title = state.getTitle();
         for (TourStep s : state.getSteps()) {
             var result = ai.generateExplanation(s.codeSnippet(), s.authorNote() == null ? "" : s.authorNote());
-            String html = result != null ? result.htmlContent() : s.aiExplanation();
-            if (result != null && (title == null || title.isBlank() || "Untitled Tour".equals(title))) {
+            String html = result.htmlContent();
+            if (title == null || title.isBlank() || "Untitled Tour".equals(title)) {
                 title = result.title();
             }
             updated.add(new TourStep(s.filePath(), s.lineNum(), s.codeSnippet(), s.authorNote(), html, s.endLine(), s.symbolName(), s.type()));
@@ -94,7 +94,8 @@ public class FinalizeTourAction extends AnAction {
             Messages.showErrorDialog(project, "Failed to save tour: " + ex.getMessage(), "Create Tour");
         }
 
-        // Disable selection mode
+        // Disable selection mode and clear state to start fresh
         project.getService(SelectionModeService.class).setEnabled(false);
+        state.clear();
     }
 }

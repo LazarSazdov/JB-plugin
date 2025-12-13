@@ -1,6 +1,7 @@
 package com.hackathon.actions;
 
 import com.hackathon.service.SelectionModeService;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -19,7 +20,14 @@ public class CreateTourModeAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         Editor editor = e.getData(CommonDataKeys.EDITOR);
-        e.getPresentation().setEnabledAndVisible(editor != null);
+        Project project = e.getProject();
+        boolean visible = false;
+        if (editor != null && project != null) {
+            SelectionModeService svc = project.getService(SelectionModeService.class);
+            // Visible only if selection mode is NOT enabled
+            visible = svc != null && !svc.isEnabled();
+        }
+        e.getPresentation().setEnabledAndVisible(visible);
     }
 
     @Override
@@ -27,10 +35,16 @@ public class CreateTourModeAction extends AnAction {
         Project project = e.getProject();
         if (project == null) return;
         SelectionModeService svc = project.getService(SelectionModeService.class);
-        boolean enable = !svc.isEnabled();
-        svc.setEnabled(enable);
+
+        // End any running tour
+        AnAction endTourAction = ActionManager.getInstance().getAction("com.hackathon.actions.EndTourAction");
+        if (endTourAction != null) {
+            endTourAction.actionPerformed(e);
+        }
+
+        svc.setEnabled(true);
         Messages.showInfoMessage(project,
-                enable ? "Selection mode enabled. Click methods/classes to add or remove them from the tour. Use 'Create Tour (Generate JSON)' to finalize." : "Selection mode disabled.",
+                "Selection mode enabled. Click methods/classes to add or remove them from the tour. Use 'Create Tour (Generate JSON)' to finalize.",
                 "Create Tour");
     }
 }

@@ -75,13 +75,13 @@ public class AddStepAction extends AnAction {
 
         OpenAIService ai = com.intellij.openapi.application.ApplicationManager.getApplication().getService(OpenAIService.class);
         var result = ai.generateExplanation(code, note);
-        String explanation = result != null ? result.htmlContent() : null;
+        String explanation = result.htmlContent();
 
         TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation, endLineNum, null, "manual");
 
         TourStateService state = project.getService(TourStateService.class);
         state.addStep(step);
-        if (result != null && state.getSteps().size() == 1) {
+        if (state.getSteps().size() == 1) {
             state.setTitle(result.title());
         }
     }
