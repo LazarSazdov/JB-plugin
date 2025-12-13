@@ -48,6 +48,8 @@ dependencies {
         bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
+
+        implementation("com.google.code.gson:gson:2.10.1")
     }
 }
 
