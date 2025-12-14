@@ -34,12 +34,12 @@ public class TourDocTarget implements DocumentationTarget {
         StringBuilder sb = new StringBuilder();
         String note = step.authorNote();
         if (note != null && !note.isBlank()) {
-            sb.append("<h3>Author Note</h3><p>").append(note).append("</p>");
+            sb.append("<h3>Author Note</h3><p>").append(escape(note)).append("</p>");
         }
 
         String ai = com.hackathon.util.HtmlSanitizer.stripCodeBlocks(step.aiExplanation());
         if (ai != null && !ai.isBlank()) {
-            sb.append(ai);
+            sb.append(escape(ai));
         }
 
         String html = sb.toString();
@@ -56,4 +56,6 @@ public class TourDocTarget implements DocumentationTarget {
                 : "Tour Step (line " + step.lineNum() + ")";
         return TargetPresentation.builder(text).presentation();
     }
+
+    private static String escape(String s) { if (s == null) return ""; return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;"); }
 }
