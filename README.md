@@ -139,6 +139,7 @@ Every developer knows the struggle:
 - 💬 Constantly interrupting teammates with "What does this function do?"
 - 🔍 Reading code line by line without understanding the bigger picture
 - ⏰ Weeks of ramp-up time before becoming productive
+- 👥 Senior developers spending countless hours repeatedly explaining the same concepts to new hires
 
 Traditional documentation is static, disconnected from the code, and often out of date. Code comments are scattered and lack context. README files give you the 10,000-foot view but not the ground-level understanding you need.
 
