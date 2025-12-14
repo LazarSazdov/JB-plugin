@@ -9,9 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/LazarSazdov/JB-plugin/workflows/Build/badge.svg">
-    <img src="https://github.com/LazarSazdov/JB-plugin/workflows/Build/badge.svg" alt="Build"/>
-  </a>
   <img src="https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white" alt="Java 21"/>
   <img src="https://img.shields.io/badge/Gradle-9.2.1-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle"/>
   <img src="https://img.shields.io/badge/IntelliJ%20Platform-2025.2-000000?style=flat&logo=intellij-idea&logoColor=white" alt="IntelliJ Platform"/>
@@ -109,39 +106,39 @@ Think of it as a **personal tour guide** for any codebase — created by experts
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        Auto Code Walker                              │
+│                        Auto Code Walker                             │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────────────────┐   │
-│  │   Actions   │   │   Services  │   │          UI             │   │
-│  ├─────────────┤   ├─────────────┤   ├─────────────────────────┤   │
-│  │ CreateTour  │   │ TourState   │   │ TourOverlayManager      │   │
-│  │ AddStep     │   │ Selection   │   │ TourToolWindow          │   │
-│  │ StartTour   │   │ EditorNav   │   │ StepCreationDialog      │   │
-│  │ FinalizeTour│   │             │   │                         │   │
-│  │ GenerateDoc │   │             │   │                         │   │
-│  └─────────────┘   └─────────────┘   └─────────────────────────┘   │
+│                                                                     │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────────────────┐    │
+│  │   Actions   │   │   Services  │   │          UI             │    │
+│  ├─────────────┤   ├─────────────┤   ├─────────────────────────┤    │
+│  │ CreateTour  │   │ TourState   │   │ TourOverlayManager      │    │
+│  │ AddStep     │   │ Selection   │   │ TourToolWindow          │    │
+│  │ StartTour   │   │ EditorNav   │   │ StepCreationDialog      │    │
+│  │ FinalizeTour│   │             │   │                         │    │
+│  │ GenerateDoc │   │             │   │                         │    │
+│  └─────────────┘   └─────────────┘   └─────────────────────────┘    │
 │         │                 │                      │                  │
 │         └─────────────────┼──────────────────────┘                  │
 │                           │                                         │
-│  ┌────────────────────────┴────────────────────────┐               │
-│  │                    Models                        │               │
-│  ├─────────────────────────────────────────────────┤               │
-│  │  Tour { title, steps[] }                        │               │
-│  │  TourStep { filePath, lineNum, endLine,         │               │
-│  │             codeSnippet, authorNote,            │               │
-│  │             aiExplanation, symbolName, type }   │               │
-│  └─────────────────────────────────────────────────┘               │
+│  ┌────────────────────────┴────────────────────────┐                │
+│  │                    Models                       │                │
+│  ├─────────────────────────────────────────────────┤                │
+│  │  Tour { title, steps[] }                        │                │
+│  │  TourStep { filePath, lineNum, endLine,         │                │
+│  │             codeSnippet, authorNote,            │                │
+│  │             aiExplanation, symbolName, type }   │                │
+│  └─────────────────────────────────────────────────┘                │
 │                           │                                         │
-│  ┌────────────────────────┴────────────────────────┐               │
-│  │              OpenAI Integration                  │               │
-│  ├─────────────────────────────────────────────────┤               │
-│  │  • Async HTTP/2 client                          │               │
-│  │  • JSON response parsing                        │               │
-│  │  • LRU caching (256 entries)                    │               │
-│  │  • Automatic retry with backoff                 │               │
-│  └─────────────────────────────────────────────────┘               │
-│                                                                      │
+│  ┌────────────────────────┴────────────────────────┐                │
+│  │              OpenAI Integration                 │                │
+│  ├─────────────────────────────────────────────────┤                │
+│  │  • Async HTTP/2 client                          │                │
+│  │  • JSON response parsing                        │                │
+│  │  • LRU caching (256 entries)                    │                │
+│  │  • Automatic retry with backoff                 │                │
+│  └─────────────────────────────────────────────────┘                │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -286,8 +283,8 @@ cd JB-plugin
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/VedranBajic">
-        <img src="https://github.com/VedranBajic.png" width="100px;" alt="Vedran Bajic"/>
+      <a href="https://github.com/vedranbajic4">
+        <img src="https://github.com/vedranbajic4.png" width="100px;" alt="Vedran Bajic"/>
         <br />
         <sub><b>Vedran Bajic</b></sub>
       </a>
