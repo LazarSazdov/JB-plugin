@@ -158,7 +158,7 @@ Instead of reading code, you **experience** it. Our IntelliJ IDEA plugin creates
 - 🔗 **Connect concepts** with smart navigation and contextual links
 - ✨ **Blur out distractions** so you can concentrate on one piece at a time
 
-Think of it as a **personal tour guide** for any codebase — created by experts, enhanced by AI.
+Think of it as a **personal tour guide** for any codebase created by experts, enhanced by AI.
 
 ---
 
@@ -330,7 +330,7 @@ Traditional Approach:          Our Approach:
 
 ### 🧠 Smart PSI (Program Structure Interface) Integration
 
-We leverage IntelliJ's powerful **PSI API** for intelligent code analysis — this is one of the most complex aspects of IntelliJ plugin development:
+We leverage IntelliJ's powerful **PSI API** for intelligent code analysis - this is one of the most complex aspects of IntelliJ plugin development:
 
 | Feature | PSI Implementation |
 |---------|-------------------|
@@ -485,7 +485,7 @@ cd JB-plugin
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ```
 MIT License
