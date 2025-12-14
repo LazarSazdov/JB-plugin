@@ -70,7 +70,8 @@ public final class TourOverlayManager {
 
             // Info Panel (Explanation)
             infoPanel.setOpaque(true);
-            infoPanel.setBackground(new JBColor(new Color(255, 255, 255, 240), new Color(60, 63, 65, 240)));
+            // Make the info box darker than the background in both themes and use white text
+            infoPanel.setBackground(new JBColor(new Color(40, 44, 52, 230), new Color(18, 18, 18, 230)));
             infoPanel.setBorder(BorderFactory.createLineBorder(new JBColor(new Color(0,120,215), new Color(0,120,215))));
             JPanel top = new JPanel(new BorderLayout());
             top.setOpaque(false);
@@ -81,8 +82,15 @@ public final class TourOverlayManager {
             topButtons.setOpaque(false);
             topButtons.add(close);
             top.add(topButtons, BorderLayout.EAST);
+            stepLabel.setForeground(Color.WHITE);
             infoPanel.add(top, BorderLayout.NORTH);
-            infoPanel.add(new JScrollPane(html), BorderLayout.CENTER);
+
+            // Make HTML area inherit dark style (transparent components)
+            html.setOpaque(false);
+            JScrollPane scroller = new JScrollPane(html);
+            scroller.setOpaque(false);
+            if (scroller.getViewport() != null) scroller.getViewport().setOpaque(false);
+            infoPanel.add(scroller, BorderLayout.CENTER);
 
             // Button Panel (Bottom Right Navigation)
             buttonPanel.setOpaque(false);
@@ -122,7 +130,22 @@ public final class TourOverlayManager {
             stepLabel.setText(label);
             // Only show AI summary (sanitized) and/or author note. Never show code snippets.
             String ai = com.hackathon.util.HtmlSanitizer.stripCodeBlocks(step.aiExplanation());
-            StringBuilder sb = new StringBuilder("<html><head><style>pre{display:none;}code{display:none;}</style></head><body>");
+            // Normalize any existing breaks before Example usage, then ensure double break is present
+            if (ai != null) {
+                // Normalize and ensure breaks before "Example usage:"
+                ai = ai.replaceAll("(?i)(?:<br\\s*/?>\\s*){1,3}Example\\s+usage\\s*:", "Example usage:");
+                ai = ai.replaceAll("(?i)Example\\s+usage\\s*:", "<br/><br/>Example usage:");
+                // Normalize and ensure breaks before "Example call:"
+                ai = ai.replaceAll("(?i)(?:<br\\s*/?>\\s*){1,3}Example\\s+call\\s*:", "Example call:");
+                ai = ai.replaceAll("(?i)Example\\s+call\\s*:", "<br/><br/>Example call:");
+            }
+            StringBuilder sb = new StringBuilder("<html><head><style>"
+                    + "body{color:#ffffff;background:transparent;font-family:sans-serif;font-size:13pt;}"
+                    + "h1,h2,h3,h4,h5,h6{color:#ffffff;}"
+                    + "p,li{color:#ffffff;}"
+                    + "a{color:#61a8ff;}"
+                    + "pre{display:none;}code{display:none;}"
+                    + "</style></head><body>");
             if (step.authorNote() != null && !step.authorNote().isBlank()) {
                 sb.append("<h3>Author Note</h3><p>").append(escape(step.authorNote())).append("</p>");
             }

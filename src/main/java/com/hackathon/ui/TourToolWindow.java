@@ -258,10 +258,16 @@ public class TourToolWindow {
         StringBuilder contentBuilder = new StringBuilder();
         if (step.authorNote() != null && !step.authorNote().isBlank()) {
             contentBuilder.append("<table width='100%' cellpadding='8' cellspacing='0' style='margin-bottom: 12px;'>")
-                    .append("<tr><td style='background-color: #dbeafe; border-left: 3px solid #3b82f6;'>")
+                    // Dark gray box with white text before the Summary
+                    .append("<tr><td style='background-color: #1f1f1f; color: #ffffff; border-left: 3px solid #3b82f6;'>")
                     .append("<b>").append(escape(step.authorNote())).append("</b></td></tr></table>");
         }
         String ai = HtmlSanitizer.stripCodeBlocks(step.aiExplanation());
+        // Ensure a visual break before any "Example usage" or "Example call" section
+        if (ai != null) {
+            ai = ai.replaceAll("(?i)Example\\s+usage\\s*:", "<br/><br/>Example usage:");
+            ai = ai.replaceAll("(?i)Example\\s+call\\s*:", "<br/><br/>Example call:");
+        }
         if (ai != null && !ai.isBlank()) {
             contentBuilder.append(ai);
         }
