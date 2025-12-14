@@ -26,6 +26,7 @@
 
 ## 📑 Table of Contents
 
+- [Project Structure](#-project-structure)
 - [The Problem](#-the-problem)
 - [The Solution](#-the-solution)
 - [Key Features](#-key-features)
@@ -35,6 +36,100 @@
 - [Getting Started](#-getting-started)
 - [The Authors](#-the-authors)
 - [License](#-license)
+
+---
+
+## 📁 Project Structure
+
+```
+JB-plugin/
+├── 📄 build.gradle.kts           # Gradle build configuration (Kotlin DSL)
+├── 📄 settings.gradle.kts        # Gradle settings
+├── 📄 gradle.properties          # Gradle properties & versions
+├── 📄 gradlew / gradlew.bat      # Gradle wrapper scripts
+├── 📄 CHANGELOG.md               # Version history
+├── 📄 README.md                  # This file
+├── 📄 codecov.yml                # Code coverage configuration
+├── 📄 qodana.yml                 # JetBrains Qodana configuration
+├── 📄 tour.json                  # Example tour file
+│
+├── 📁 .github/
+│   ├── dependabot.yml            # Dependency update automation
+│   └── workflows/                # GitHub Actions CI/CD
+│
+├── 📁 gradle/
+│   ├── libs.versions.toml        # Centralized dependency versions
+│   └── wrapper/                  # Gradle wrapper files
+│
+├── 📁 src/
+│   ├── 📁 main/
+│   │   ├── 📁 java/com/hackathon/
+│   │   │   │
+│   │   │   ├── 📁 actions/                      # IntelliJ Action Handlers
+│   │   │   │   ├── AddStepAction.java           # Add step to tour in selection mode
+│   │   │   │   ├── ClearTourSelectionsAction.java  # Clear all selected steps
+│   │   │   │   ├── CreateTourModeAction.java    # Enter tour creation mode
+│   │   │   │   ├── EndTourAction.java           # Exit active tour
+│   │   │   │   ├── ExitSelectionModeAction.java # Exit selection mode
+│   │   │   │   ├── FinalizeTourAction.java      # Save tour without AI
+│   │   │   │   ├── GenerateJavadocForTourAction.java  # AI-powered doc generation
+│   │   │   │   ├── GenerateTourAction.java      # Create tour.json with AI
+│   │   │   │   ├── LoadTourAction.java          # Load tour from JSON
+│   │   │   │   └── StartTourAction.java         # Begin tour walkthrough
+│   │   │   │
+│   │   │   ├── 📁 doc/                          # Documentation API Integration
+│   │   │   │   ├── TourDocTarget.java           # Custom documentation target
+│   │   │   │   └── TourDocTargetProvider.java   # Inject tour docs into Quick Doc
+│   │   │   │
+│   │   │   ├── 📁 model/                        # Data Models
+│   │   │   │   ├── Tour.java                    # Tour container (title, steps)
+│   │   │   │   └── TourStep.java                # Individual step data
+│   │   │   │
+│   │   │   ├── 📁 openai/                       # AI Integration
+│   │   │   │   └── OpenAIService.java           # Async API client w/ caching
+│   │   │   │
+│   │   │   ├── 📁 service/                      # Core Business Logic
+│   │   │   │   ├── EditorNavigationService.java # Navigate between steps
+│   │   │   │   ├── SelectionModeService.java    # Manage selection state
+│   │   │   │   └── TourStateService.java        # Global tour state manager
+│   │   │   │
+│   │   │   ├── 📁 ui/                           # User Interface Components
+│   │   │   │   ├── StepCreationDialog.java      # Dialog for adding notes
+│   │   │   │   ├── TourOverlayManager.java      # Spotlight & blur effects
+│   │   │   │   ├── TourToolWindow.java          # Main tour navigation panel
+│   │   │   │   └── TourToolWindowFactory.java   # Tool window registration
+│   │   │   │
+│   │   │   └── 📁 util/                         # Utilities
+│   │   │       ├── HtmlSanitizer.java           # Sanitize HTML in docs
+│   │   │       └── HtmlSanitizerTest.java       # Unit tests
+│   │   │
+│   │   └── 📁 resources/
+│   │       ├── 📁 messages/
+│   │       │   └── MyBundle.properties          # I18N strings
+│   │       └── 📁 META-INF/
+│   │           └── plugin.xml                   # Plugin manifest & config
+│   │
+│   └── 📁 test/                                 # Test Suite
+│       ├── java/com/hackathon/util/
+│       │   └── HtmlSanitizerTest.java
+│       └── testData/rename/                     # Test fixtures
+│
+└── 📁 build/                                    # Build outputs (gitignored)
+    └── tmp/generateManifest/
+```
+
+### 📦 Key Directories Explained
+
+| Directory | Purpose |
+|-----------|---------|
+| **actions/** | Contains all IntelliJ IDEA action handlers (right-click menu items, keyboard shortcuts) |
+| **doc/** | Integrates tour explanations into IntelliJ's Quick Documentation (Ctrl+Q) |
+| **model/** | Data models for Tour and TourStep (serialized to JSON) |
+| **openai/** | OpenAI API client with async requests, LRU caching, and retry logic |
+| **service/** | Core services for state management and editor navigation |
+| **ui/** | Swing-based UI components including overlays, dialogs, and tool windows |
+| **util/** | Helper utilities like HTML sanitization for safe rendering |
+| **resources/META-INF/** | Plugin configuration, action registrations, and extension points |
 
 ---
 
