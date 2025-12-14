@@ -64,8 +64,9 @@ public final class OpenAIService {
             system.addProperty("role", "system");
             system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
                     "'title' (short summary), " +
-                    "'explanation' (a concise summary; DO NOT include any code snippets). " +
-                    "Do not include markdown formatting in the JSON values.");
+                    "'explanation' (a concise summary; DO NOT include any code snippets. Include a usage example at the end). " +
+                    "Do not include markdown formatting in the JSON values." +
+                    " Example: { \"title\": \"Method Summary\", \"explanation\": \"This method calculates the sum of two integers. Example call: sum(1, 2).\" }");
 
             JsonObject user = new JsonObject();
             user.addProperty("role", "user");
@@ -129,8 +130,9 @@ public final class OpenAIService {
         system.addProperty("role", "system");
         system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
                 "'title' (short summary), " +
-                "'explanation' (a concise summary; DO NOT include any code snippets). " +
-                "Do not include markdown formatting in the JSON values.");
+                "'explanation' (a concise summary; DO NOT include any code snippets. Include a usage example at the end). " +
+                "Do not include markdown formatting in the JSON values." +
+                " Example: { \"title\": \"Method Summary\", \"explanation\": \"This method calculates the sum of two integers. Example call: sum(1, 2).\" }");
 
         JsonObject user = new JsonObject();
         user.addProperty("role", "user");
@@ -191,8 +193,9 @@ public final class OpenAIService {
             system.addProperty("role", "system");
             system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
                     "'title' (short summary), " +
-                    "'explanation' (a concise summary; DO NOT include any code snippets). " +
-                    "Do not include markdown formatting in the JSON values.");
+                    "'explanation' (a concise summary; DO NOT include any code snippets. Include a usage example at the end). " +
+                    "Do not include markdown formatting in the JSON values." +
+                    " Example: { \"title\": \"Method Summary\", \"explanation\": \"This method calculates the sum of two integers. Example call: sum(1, 2).\" }");
 
             com.google.gson.JsonObject user = new com.google.gson.JsonObject();
             user.addProperty("role", "user");
@@ -251,8 +254,9 @@ public final class OpenAIService {
         system.addProperty("role", "system");
         system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
                 "'title' (short summary), " +
-                "'explanation' (a concise summary; DO NOT include any code snippets). " +
-                "Do not include markdown formatting in the JSON values.");
+                "'explanation' (a concise summary; DO NOT include any code snippets. Include a usage example at the end). " +
+                "Do not include markdown formatting in the JSON values." +
+                " Example: { \"title\": \"Method Summary\", \"explanation\": \"This method calculates the sum of two integers. Example call: sum(1, 2).\" }");
 
         com.google.gson.JsonObject user = new com.google.gson.JsonObject();
         user.addProperty("role", "user");
