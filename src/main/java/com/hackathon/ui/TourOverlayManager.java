@@ -155,7 +155,7 @@ public final class TourOverlayManager {
             if (getParent() != layered) {
                 layered.add(this, JLayeredPane.DRAG_LAYER);
             }
-            updateBounds(layered);
+            //updateBounds(layered);
             setVisible(true);
             requestFocusInWindow();
 
@@ -202,11 +202,11 @@ public final class TourOverlayManager {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             // Dim background
-            g2.setColor(new JBColor(new Color(0, 0, 0, 100), new Color(0, 0, 0, 100)));
-            g2.fillRect(0, 0, getWidth(), getHeight());
+            //g2.setColor(new JBColor(new Color(0, 0, 0, 100), new Color(0, 0, 0, 100)));
+            //g2.fillRect(0, 0, getWidth(), getHeight());
 
             // Focus rectangle around selected lines
-            int startLine0 = Math.max(0, step.lineNum() - 1);
+            /*int startLine0 = Math.max(0, step.lineNum() - 1);
             int endLine0 = step.endLine() != null ? Math.max(startLine0, step.endLine() - 1) : startLine0;
             Point p1 = editor.logicalPositionToXY(new LogicalPosition(startLine0, 0));
             Point p2 = editor.logicalPositionToXY(new LogicalPosition(endLine0 + 1, 0));
@@ -218,7 +218,7 @@ public final class TourOverlayManager {
             g2.fillRoundRect(8, focusY, getWidth() - 16, focusH, 8, 8);
             g2.setColor(new JBColor(new Color(0,120,215), new Color(0,120,215)));
             g2.setStroke(new BasicStroke(2f));
-            g2.drawRoundRect(8, focusY, getWidth() - 16, focusH, 8, 8);
+            g2.drawRoundRect(8, focusY, getWidth() - 16, focusH, 8, 8);*/
             g2.dispose();
             // Ensure info panel stays on top
             infoPanel.repaint();
