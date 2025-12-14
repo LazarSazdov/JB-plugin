@@ -15,6 +15,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import org.freedesktop.dbus.spi.message.IMessageWriter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -82,7 +83,9 @@ public class TourToolWindow {
 
         // HTML pane for displaying step content - cleaner setup
         htmlPane = new JEditorPane();
-        htmlPane.setContentType("text/html");
+
+        htmlPane.setContentType("text/html");          // <-- critical
+        htmlPane.setEditorKit(new javax.swing.text.html.HTMLEditorKit());
         htmlPane.setEditable(false);
         htmlPane.setOpaque(false);
         htmlPane.setBorder(JBUI.Borders.empty());
@@ -270,6 +273,7 @@ public class TourToolWindow {
         Color linkColor = JBUI.CurrentTheme.Link.Foreground.ENABLED;
         Color secondaryColor = UIUtil.getContextHelpForeground();
 
+
         String fgHex = colorToHex(fgColor);
         String bgHex = colorToHex(bgColor);
         String linkHex = colorToHex(linkColor);
@@ -307,6 +311,7 @@ public class TourToolWindow {
         }
 
         styledHtml += "</body></html>";
+
 
         htmlPane.setText(styledHtml);
         htmlPane.setCaretPosition(0);
