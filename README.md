@@ -109,10 +109,6 @@ JB-plugin/
 │   │       └── 📁 META-INF/
 │   │           └── plugin.xml                   # Plugin manifest & config
 │   │
-│   └── 📁 test/                                 # Test Suite
-│       ├── java/com/hackathon/util/
-│       │   └── HtmlSanitizerTest.java
-│       └── testData/rename/                     # Test fixtures
 │
 └── 📁 build/                                    # Build outputs (gitignored)
     └── tmp/generateManifest/
