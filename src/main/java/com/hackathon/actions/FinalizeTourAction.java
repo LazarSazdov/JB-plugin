@@ -79,15 +79,7 @@ public class FinalizeTourAction extends AnAction {
         String basePath = project.getBasePath();
         if (basePath == null) basePath = new File(".").getAbsolutePath();
         File out = new File(basePath, "tour.json");
-        if (out.exists()) {
-            int choice = Messages.showYesNoDialog(project,
-                    "File tour.json already exists in project root. Overwrite?",
-                    "Create Tour",
-                    "Overwrite",
-                    "Cancel",
-                    null);
-            if (choice != Messages.YES) return;
-        }
+        
         try (FileWriter fw = new FileWriter(out, StandardCharsets.UTF_8)) {
             gson.toJson(new Tour(title, updated), fw);
             Messages.showInfoMessage(project, "Tour saved to: " + out.getAbsolutePath(), "Create Tour");
