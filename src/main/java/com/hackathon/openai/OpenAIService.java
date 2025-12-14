@@ -24,9 +24,9 @@ public final class OpenAIService {
     public record ExplanationResult(String title, String htmlContent) {}
 
     /**
-     * Generate HTML explanation for a code snippet with an author note.
-     * Requirements: explanation must be precise and include at least one concrete usage example.
-     * Uses response_format json_object to get back {"title": ..., "html_content": ...}.
+     * Generate HTML summary for a code snippet with an author note.
+     * Requirements: explanation must be precise. We intentionally avoid including code blocks in the HTML output.
+     * Uses response_format json_object to get back {"title": ..., ...}.
      */
     public @NotNull ExplanationResult generateExplanation(@NotNull String code, @NotNull String note) {
         String apiKey = getApiKey();
@@ -40,8 +40,7 @@ public final class OpenAIService {
             system.addProperty("role", "system");
             system.addProperty("content", "You are an expert code tour guide. Return a JSON object with keys: " +
                     "'title' (short summary), " +
-                    "'explanation' (clear explanation of the code), " +
-                    "'usage_example' (a short code snippet showing how to call/use this code). " +
+                    "'explanation' (a concise summary; DO NOT include any code snippets). " +
                     "Do not include markdown formatting in the JSON values.");
 
             JsonObject user = new JsonObject();
@@ -79,10 +78,8 @@ public final class OpenAIService {
                         String title = parsed.has("title") ? parsed.get("title").getAsString() : "Auto Code Walker Tour";
 
                         String expl = parsed.has("explanation") ? parsed.get("explanation").getAsString() : "";
-                        String usage = parsed.has("usage_example") ? parsed.get("usage_example").getAsString() : "";
-
-                        String html = "<h3>Explanation</h3><p>" + escape(expl) + "</p>" +
-                                      "<h3>Usage Example</h3><pre>" + escape(usage) + "</pre>";
+                        // Only include the explanation. We intentionally omit usage/code from the HTML to avoid displaying code.
+                        String html = "<h3>Summary</h3><p>" + escape(expl) + "</p>";
 
                         return new ExplanationResult(title, html);
                     }

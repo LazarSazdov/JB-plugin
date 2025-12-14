@@ -3,6 +3,7 @@ package com.hackathon.actions;
 import com.hackathon.model.TourStep;
 import com.hackathon.openai.OpenAIService;
 import com.hackathon.service.TourStateService;
+import com.hackathon.util.HtmlSanitizer;
 import com.hackathon.ui.StepCreationDialog;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -75,7 +76,7 @@ public class AddStepAction extends AnAction {
 
         OpenAIService ai = com.intellij.openapi.application.ApplicationManager.getApplication().getService(OpenAIService.class);
         var result = ai.generateExplanation(code, note);
-        String explanation = result.htmlContent();
+        String explanation = HtmlSanitizer.stripCodeBlocks(result.htmlContent());
 
         TourStep step = new TourStep(vFile.getPath(), lineNum, code, note, explanation, endLineNum, null, "manual");
 

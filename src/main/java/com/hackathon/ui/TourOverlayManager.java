@@ -120,9 +120,17 @@ public final class TourOverlayManager {
             this.total = total;
             String label = "Step " + index + " of " + total + (step.symbolName() != null ? ": " + step.symbolName() : "");
             stepLabel.setText(label);
-            String content = step.aiExplanation() != null && !step.aiExplanation().isBlank() ? step.aiExplanation()
-                    : ("<h3>" + (step.authorNote() == null ? "" : escape(step.authorNote())) + "</h3><pre>" + escape(step.codeSnippet()) + "</pre>");
-            html.setText("<html><body>" + content + "</body></html>");
+            // Only show AI summary (sanitized) and/or author note. Never show code snippets.
+            String ai = com.hackathon.util.HtmlSanitizer.stripCodeBlocks(step.aiExplanation());
+            StringBuilder sb = new StringBuilder("<html><head><style>pre{display:none;}code{display:none;}</style></head><body>");
+            if (step.authorNote() != null && !step.authorNote().isBlank()) {
+                sb.append("<h3>Author Note</h3><p>").append(escape(step.authorNote())).append("</p>");
+            }
+            if (ai != null && !ai.isBlank()) {
+                sb.append(ai);
+            }
+            sb.append("</body></html>");
+            html.setText(sb.toString());
             html.setCaretPosition(0);
             // Show Finish on last step
             boolean isLast = index >= total;

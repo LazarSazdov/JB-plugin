@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.hackathon.model.Tour;
 import com.hackathon.model.TourStep;
 import com.hackathon.openai.OpenAIService;
+import com.hackathon.util.HtmlSanitizer;
 import com.hackathon.service.SelectionModeService;
 import com.hackathon.service.TourStateService;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -63,7 +64,7 @@ public class FinalizeTourAction extends AnAction {
         String title = state.getTitle();
         for (TourStep s : state.getSteps()) {
             var result = ai.generateExplanation(s.codeSnippet(), s.authorNote() == null ? "" : s.authorNote());
-            String html = result.htmlContent();
+            String html = HtmlSanitizer.stripCodeBlocks(result.htmlContent());
             if (title == null || title.isBlank() || "Untitled Tour".equals(title)) {
                 title = result.title();
             }

@@ -37,7 +37,7 @@ public class TourDocTarget implements DocumentationTarget {
             sb.append("<h3>Author Note</h3><p>").append(note).append("</p>");
         }
 
-        String ai = step.aiExplanation();
+        String ai = com.hackathon.util.HtmlSanitizer.stripCodeBlocks(step.aiExplanation());
         if (ai != null && !ai.isBlank()) {
             sb.append(ai);
         }
