@@ -271,7 +271,7 @@ public final class SelectionModeService implements Disposable {
         }
     }
 
-    private void clearAllHighlighters() {
+        private void clearAllHighlighters() {
         for (Editor ed : new ArrayList<>(editorHighlighters.keySet())) {
             clearHighlighters(ed);
         }
