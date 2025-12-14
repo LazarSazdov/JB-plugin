@@ -210,7 +210,7 @@ Think of it as a **personal tour guide** for any codebase — created by experts
 
 ## ⚡ Advanced Implementation
 
-> **Note for Judges:** This section highlights the technically challenging aspects of our implementation that go beyond basic plugin development.
+> **Note:** This section highlights the technically challenging aspects of our implementation that go beyond basic plugin development.
 
 ### 🚄 Parallel Batch API Requests
 
@@ -219,10 +219,10 @@ One of our key optimizations is **parallel processing of OpenAI API requests**. 
 ```
 Traditional Approach:          Our Approach:
 ┌─────────────────────┐        ┌─────────────────────┐
-│ Function 1 → 5s     │        │ Function 1 ─┐      │
-│ Function 2 → 5s     │        │ Function 2 ─┼─→ 5s │
-│ Function 3 → 5s     │        │ Function 3 ─┤      │
-│ Function 4 → 5s     │        │ Function 4 ─┘      │
+│ Function 1 → 5s     │        │ Function 1 ─┐       │
+│ Function 2 → 5s     │        │ Function 2 ─┼─→ 5s  │
+│ Function 3 → 5s     │        │ Function 3 ─┤       │
+│ Function 4 → 5s     │        │ Function 4 ─┘       │
 ├─────────────────────┤        ├─────────────────────┤
 │ Total: ~20 seconds  │        │ Total: ~5 seconds   │
 └─────────────────────┘        └─────────────────────┘
